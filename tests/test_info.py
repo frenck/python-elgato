@@ -7,7 +7,7 @@ from . import load_fixture
 
 
 @pytest.mark.asyncio
-async def test_info(event_loop, aresponses):
+async def test_info(aresponses):
     """Test getting Elgato Key Light device information."""
     aresponses.add(
         "example.com:9123",
@@ -19,8 +19,8 @@ async def test_info(event_loop, aresponses):
             text=load_fixture("info.json"),
         ),
     )
-    async with aiohttp.ClientSession(loop=event_loop) as session:
-        elgato = Elgato("example.com", session=session, loop=event_loop,)
+    async with aiohttp.ClientSession() as session:
+        elgato = Elgato("example.com", session=session)
         info: Info = await elgato.info()
         assert info
         assert info.display_name == "Frenck"

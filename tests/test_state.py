@@ -7,7 +7,7 @@ from . import load_fixture
 
 
 @pytest.mark.asyncio
-async def test_state(event_loop, aresponses):
+async def test_state(aresponses):
     """Test getting Elgato Key Light state."""
     aresponses.add(
         "example.com:9123",
@@ -19,8 +19,8 @@ async def test_state(event_loop, aresponses):
             text=load_fixture("state.json"),
         ),
     )
-    async with aiohttp.ClientSession(loop=event_loop) as session:
-        elgato = Elgato("example.com", session=session, loop=event_loop,)
+    async with aiohttp.ClientSession() as session:
+        elgato = Elgato("example.com", session=session)
         state: State = await elgato.state()
         assert state
         assert state.brightness == 21
@@ -29,7 +29,7 @@ async def test_state(event_loop, aresponses):
 
 
 @pytest.mark.asyncio
-async def test_change_state(event_loop, aresponses):
+async def test_change_state(aresponses):
     """Test changing Elgato Key Light State."""
 
     async def response_handler(request):
@@ -44,6 +44,6 @@ async def test_change_state(event_loop, aresponses):
 
     aresponses.add("example.com:9123", "/elgato/lights", "PUT", response_handler)
 
-    async with aiohttp.ClientSession(loop=event_loop) as session:
-        elgato = Elgato("example.com", session=session, loop=event_loop,)
+    async with aiohttp.ClientSession() as session:
+        elgato = Elgato("example.com", session=session)
         await elgato.light(on=True, brightness=100, temperature=100)
