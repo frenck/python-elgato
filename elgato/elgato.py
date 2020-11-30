@@ -1,4 +1,6 @@
 """Asynchronous Python client for Elgato Key Lights."""
+from __future__ import annotations
+
 import asyncio
 import socket
 from typing import Any, Optional
@@ -117,7 +119,7 @@ class Elgato:
         if self._session and self._close_session:
             await self._session.close()
 
-    async def __aenter__(self) -> "Elgato":
+    async def __aenter__(self) -> Elgato:
         """Async enter."""
         return self
 

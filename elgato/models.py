@@ -1,9 +1,11 @@
 """Asynchronous Python client for Elgato Key Lights."""
+from __future__ import annotations
 
-import attr
+from dataclasses import dataclass
+from typing import Any, Dict
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@dataclass
 class State:
     """Object holding the Elgato Key Light state."""
 
@@ -12,20 +14,16 @@ class State:
     temperature: int
 
     @staticmethod
-    def from_dict(data):
+    def from_dict(data: Dict[str, Any]) -> State:
         """Return a State object from a Elgato Key Light API response."""
-        on = False
-        if data["lights"][0]["on"] == 1:
-            on = True
-
         return State(
-            on=on,
+            on=(data["lights"][0]["on"] == 1),
             brightness=data["lights"][0]["brightness"],
             temperature=data["lights"][0]["temperature"],
         )
 
 
-@attr.s(auto_attribs=True, frozen=True)
+@dataclass
 class Info:
     """Object holding the Elgato Key Light device information."""
 
@@ -37,7 +35,7 @@ class Info:
     display_name: str
 
     @staticmethod
-    def from_dict(data):
+    def from_dict(data: Dict[str, Any]) -> Info:
         """Return a Info object from a Elgato Key Light API response."""
         return Info(
             product_name=data["productName"],
