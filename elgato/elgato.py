@@ -30,7 +30,11 @@ class Elgato:
         self.port = port
         self.request_timeout = request_timeout
 
-    async def _request(self, uri: str, data: Optional[dict] = None,) -> Any:
+    async def _request(
+        self,
+        uri: str,
+        data: Optional[dict] = None,
+    ) -> Any:
         """Handle a request to a Elgato Key Light device."""
         method = "GET" if data is None else "PUT"
         url = URL.build(
@@ -49,7 +53,10 @@ class Elgato:
         try:
             with async_timeout.timeout(self.request_timeout):
                 response = await self._session.request(
-                    method, url, json=data, headers=headers,
+                    method,
+                    url,
+                    json=data,
+                    headers=headers,
                 )
                 response.raise_for_status()
         except asyncio.TimeoutError as exception:

@@ -1,6 +1,7 @@
 """Tests for retreiving information from the Elgato Key Light device."""
 import aiohttp
 import pytest
+
 from elgato import Elgato, Info
 
 from . import load_fixture

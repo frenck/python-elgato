@@ -3,6 +3,7 @@ import asyncio
 
 import aiohttp
 import pytest
+
 from elgato import Elgato
 from elgato.exceptions import ElgatoConnectionError, ElgatoError
 

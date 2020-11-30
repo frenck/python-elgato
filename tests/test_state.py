@@ -1,6 +1,7 @@
 """Tests for retreiving information from the Elgato Key Light device."""
 import aiohttp
 import pytest
+
 from elgato import Elgato, State
 
 from . import load_fixture
@@ -39,7 +40,9 @@ async def test_change_state(aresponses):
             "lights": [{"on": 1, "brightness": 100, "temperature": 100}],
         }
         return aresponses.Response(
-            status=200, headers={"Content-Type": "application/json"}, text="{}",
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text="{}",
         )
 
     aresponses.add("example.com:9123", "/elgato/lights", "PUT", response_handler)
