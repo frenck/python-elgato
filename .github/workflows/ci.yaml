@@ -22,7 +22,7 @@ jobs:
           poetry run pre-commit --version
       - name: Run pre-commit on all files
         run: |
-          pre-commit run --all-files --show-diff-on-failure
+          poetry run pre-commit run --all-files --show-diff-on-failure
   test:
     name: Python ${{ matrix.python }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}-latest
