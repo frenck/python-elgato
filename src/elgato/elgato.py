@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import socket
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 import async_timeout
@@ -24,7 +24,16 @@ class Elgato:
         request_timeout: int = 8,
         session: aiohttp.client.ClientSession = None,
     ) -> None:
-        """Initialize connection with the Elgato Key Light."""
+        """Initialize connection with the Elgato Key Light.
+
+        Constructor to set up the Elgato Key Light instance.
+
+        Args:
+            host: Hostname or IP address of the Elgato Key Light.
+            port: The port number, in general this is 9123 (default).
+            request_timeout: An integer with the request timeout in seconds.
+            session: Optional, shared, aiohttp client session.
+        """
         self._session = session
         self._close_session = False
 
@@ -35,9 +44,27 @@ class Elgato:
     async def _request(
         self,
         uri: str,
-        data: Optional[dict] = None,
+        data: dict | None = None,
     ) -> Any:
-        """Handle a request to a Elgato Key Light device."""
+        """Handle a request to a Elgato Key Light device.
+
+        A generic method for sending/handling HTTP requests done against
+        the Elgato Key Light API.
+
+        Args:
+            uri: Request URI, without '/elgato/', for example, 'info'
+            data: Dictionary of data to send to the Elgato Key Light.
+
+        Returns:
+            A Python dictionary (JSON decoded) with the response from
+            the Elgato Key Light API.
+
+        Raises:
+            ElgatoConnectionError: An error occurred while communicating with
+                the Elgato Key Light.
+            ElgatoError: Received an unexpected response from the Elgato Key
+                Light API.
+        """
         method = "GET" if data is None else "PUT"
         url = URL.build(
             scheme="http", host=self.host, port=self.port, path="/elgato/"
@@ -84,23 +111,37 @@ class Elgato:
 
         return await response.json()
 
-    async def state(self):
-        """Get the current state of Elgato Key Light device."""
+    async def state(self) -> State:
+        """Get the current state of Elgato Key Light device.
+
+        Returns:
+            A State object, with the current Elgato Key Light state.
+        """
         data = await self._request("lights")
         return State.from_dict(data)
 
     async def info(self) -> Info:
-        """Get devices information from Elgato Key Light device."""
+        """Get devices information from Elgato Key Light device.
+
+        Returns:
+            A Info object, with information about the Elgato Key Light device.
+        """
         data = await self._request("accessory-info")
         return Info.from_dict(data)
 
     async def light(
         self,
-        on: Optional[bool] = None,
-        brightness: Optional[int] = None,
-        temperature: Optional[int] = None,
+        on: bool | None = None,
+        brightness: int | None = None,
+        temperature: int | None = None,
     ) -> None:
-        """Change state of an Elgato Key Light device."""
+        """Change state of an Elgato Key Light device.
+
+        Args:
+            on: A boolean, true to turn the light on, false otherwise.
+            brightness: The brightness of the light, between 0 and 255.
+            temperature: The color temperature of the light, in mired.
+        """
         state = {}
 
         if on is not None:
@@ -120,9 +161,17 @@ class Elgato:
             await self._session.close()
 
     async def __aenter__(self) -> Elgato:
-        """Async enter."""
+        """Async enter.
+
+        Returns:
+            The Elgato object.
+        """
         return self
 
-    async def __aexit__(self, *exc_info) -> None:
-        """Async exit."""
+    async def __aexit__(self, *_exc_info) -> None:
+        """Async exit.
+
+        Args:
+            _exc_info: Exec type.
+        """
         await self.close()

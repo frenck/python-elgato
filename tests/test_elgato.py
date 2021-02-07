@@ -1,4 +1,5 @@
 """Tests for the Elgato Key Lights Library."""
+# pylint: disable=protected-access
 import asyncio
 
 import aiohttp
