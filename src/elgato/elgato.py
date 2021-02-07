@@ -3,13 +3,13 @@ from __future__ import annotations
 
 import asyncio
 import socket
+from importlib import metadata
 from typing import Any
 
 import aiohttp
 import async_timeout
 from yarl import URL
 
-from .__version__ import __version__
 from .exceptions import ElgatoConnectionError, ElgatoError
 from .models import Info, State
 
@@ -65,13 +65,14 @@ class Elgato:
             ElgatoError: Received an unexpected response from the Elgato Key
                 Light API.
         """
+        version = metadata.version(__package__)
         method = "GET" if data is None else "PUT"
         url = URL.build(
             scheme="http", host=self.host, port=self.port, path="/elgato/"
         ).join(URL(uri))
 
         headers = {
-            "User-Agent": f"PythonElgato/{__version__}",
+            "User-Agent": f"PythonElgato/{version}",
             "Accept": "application/json, text/plain, */*",
         }
 

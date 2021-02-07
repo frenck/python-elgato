@@ -26,6 +26,7 @@ async def test_json_request(aresponses):
         elgato = Elgato("example.com", session=session)
         response = await elgato._request("test")
         assert response["status"] == "ok"
+        await elgato.close()
 
 
 @pytest.mark.asyncio
@@ -134,7 +135,7 @@ async def test_unexpected_response(aresponses):
 
 
 @pytest.mark.asyncio
-async def test_light(aresponses):
+async def test_light_on(aresponses):
     """Test controlling a Elgato Key Light."""
     # Handle to run asserts on request in
     async def response_handler(request):
@@ -159,3 +160,59 @@ async def test_light(aresponses):
     async with aiohttp.ClientSession() as session:
         elgato = Elgato("example.com", session=session)
         await elgato.light(on=True, brightness=100, temperature=275)
+
+
+@pytest.mark.asyncio
+async def test_light_off(aresponses):
+    """Test turning off an Elgato Key Light."""
+    # Handle to run asserts on request in
+    async def response_handler(request):
+        data = await request.json()
+        assert data == {
+            "numberOfLights": 1,
+            "lights": [{"on": 0}],
+        }
+        return aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text='{"status": "ok"}',
+        )
+
+    aresponses.add(
+        "example.com:9123",
+        "/elgato/lights",
+        "PUT",
+        response_handler,
+    )
+
+    async with aiohttp.ClientSession() as session:
+        elgato = Elgato("example.com", session=session)
+        await elgato.light(on=False)
+
+
+@pytest.mark.asyncio
+async def test_light_no_on_off(aresponses):
+    """Test controlling an Elgato Key Light without turning it on/off."""
+    # Handle to run asserts on request in
+    async def response_handler(request):
+        data = await request.json()
+        assert data == {
+            "numberOfLights": 1,
+            "lights": [{"brightness": 50}],
+        }
+        return aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text='{"status": "ok"}',
+        )
+
+    aresponses.add(
+        "example.com:9123",
+        "/elgato/lights",
+        "PUT",
+        response_handler,
+    )
+
+    async with aiohttp.ClientSession() as session:
+        elgato = Elgato("example.com", session=session)
+        await elgato.light(brightness=50)
