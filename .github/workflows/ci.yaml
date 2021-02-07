@@ -1,61 +1,56 @@
 ---
-name: Continuous Integration
+name: CI
 
 # yamllint disable-line rule:truthy
 on: [push, pull_request]
 
 jobs:
-  linting:
-    name: Linting
+  precommit:
+    name: ${{ matrix.name }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - id: check-ast
+            name: Check Python AST
+          - id: check-case-conflict
+            name: Check for case conflicts
+          - id: check-docstring-first
+            name: Check docstring is first
+          - id: check-executables-have-shebangs
+            name: Check that executables have shebangs
+          - id: check-json
+            name: Check JSON files
+          - id: check-merge-conflict
+            name: Check for merge conflicts
+          - id: check-symlinks
+            name: Check for broken symlinks
+          - id: check-toml
+            name: Check TOML files
+          - id: check-xml
+            name: Check XML files
+          - id: check-yaml
+            name: Check YAML files
+          - id: debug-statements
+            name: Debug Statements and imports (Python)
+          - id: detect-private-key
+            name: Detect Private Keys
+          - id: end-of-file-fixer
+            name: Fix End of Files
+          - id: fix-byte-order-marker
+            name: Fix UTF-8 byte order marker
+          - id: trailing-whitespace
+            name: Trim Trailing Whitespace
     steps:
-      - name: Checking out code from GitHub
+      - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
-      - name: Set up Python 3.8
+      - name: 🏗 Set up Python 3.8
         uses: actions/setup-python@v2.2.1
         with:
           python-version: 3.8
-      - name: Read .nvmrc
-        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
-        id: nvm
-      - name: Use Node.js (.nvmrc)
-        uses: actions/setup-node@v2.1.4
-        with:
-          node-version: "${{ steps.nvm.outputs.NVMRC }}"
-      - name: Install dependencies
+      - name: 🏗 Install dependencies
         run: |
-          python -m pip install --upgrade pip setuptools wheel poetry
+          pip install -r .github/workflows/requirements.txt
           poetry install
-          poetry run pre-commit --version
-          npm install
-      - name: Run pre-commit on all files
-        run: |
-          poetry run pre-commit run --all-files --show-diff-on-failure
-  test:
-    name: Python ${{ matrix.python }} on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}-latest
-    strategy:
-      matrix:
-        os: [ubuntu]
-        python: [3.8, 3.9]
-    steps:
-      - name: Checking out code from GitHub
-        uses: actions/checkout@v2.3.4
-      - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v2.2.1
-        with:
-          python-version: ${{ matrix.python }}
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip setuptools wheel poetry
-          poetry install
-      - name: Pytest with coverage reporting
-        run: poetry run pytest --cov=elgato --cov-report=xml
-      - name: Upload coverage to Codecov
-        if: matrix.python == 3.8 && matrix.os == 'ubuntu'
-        uses: codecov/codecov-action@v1.2.1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
+      - name: 🚀 Run pre-commit for ${{ matrix.id }}
+        run: poetry run pre-commit run ${{ matrix.id }} --all-files
