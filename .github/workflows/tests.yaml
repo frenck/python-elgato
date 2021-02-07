@@ -50,6 +50,6 @@ jobs:
       - name: 🚀 Process coverage results
         run: |
           poetry run coverage combine coverage*/.coverage*
-          poetry run coverage -i xml
+          poetry run coverage xml -i
       - name: 🚀 Upload coverage report
         uses: codecov/codecov-action@v1.2.1
