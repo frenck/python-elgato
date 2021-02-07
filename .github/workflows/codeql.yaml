@@ -10,7 +10,7 @@ on:
 
 jobs:
   codeql:
-    name: ♻️ Sync labels
+    name: Scanning
     runs-on: ubuntu-latest
     steps:
       - name: ⤵️ Check out code from GitHub
