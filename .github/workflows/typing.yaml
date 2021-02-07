@@ -23,7 +23,7 @@ jobs:
           pip install -r .github/workflows/requirements.txt
           poetry install
       - name: 🚀 Run mypy
-        run: poetry run mypy
+        run: poetry run mypy examples src tests
 
   pyright:
     name: pyright
@@ -51,4 +51,4 @@ jobs:
           poetry install
           npm install
       - name: 🚀 Run pyright
-        run: npm run pyright
+        run: poetry run npm run pyright
