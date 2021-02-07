@@ -65,6 +65,16 @@ Changelog = "https://github.com/frenck/python-elgato/releases"
 [tool.black]
 target-version = ['py37']
 
+[tool.coverage.paths]
+source = ["src"]
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.coverage.run]
+branch = true
+source = ["elgato"]
+
 [tool.isort]
 profile = "black"
 multi_line_output = 3
@@ -99,6 +109,9 @@ ignore-imports = true
 
 [tool.pylint.FORMAT]
 max-line-length=88
+
+[tool.pytest.ini_options]
+addopts = "--cov"
 
 [tool.vulture]
 min_confidence = 80

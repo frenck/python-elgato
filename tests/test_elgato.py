@@ -131,3 +131,31 @@ async def test_unexpected_response(aresponses):
         elgato = Elgato("example.com", session=session)
         with pytest.raises(ElgatoError):
             assert await elgato._request("test")
+
+
+@pytest.mark.asyncio
+async def test_light(aresponses):
+    """Test controlling a Elgato Key Light."""
+    # Handle to run asserts on request in
+    async def response_handler(request):
+        data = await request.json()
+        assert data == {
+            "numberOfLights": 1,
+            "lights": [{"brightness": 100, "temperature": 275, "on": 1}],
+        }
+        return aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text='{"status": "ok"}',
+        )
+
+    aresponses.add(
+        "example.com:9123",
+        "/elgato/lights",
+        "PUT",
+        response_handler,
+    )
+
+    async with aiohttp.ClientSession() as session:
+        elgato = Elgato("example.com", session=session)
+        await elgato.light(on=True, brightness=100, temperature=275)

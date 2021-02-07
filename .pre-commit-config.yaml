@@ -115,7 +115,7 @@ repos:
         language: system
         entry: poetry check
         pass_filenames: false
-        run_always: true
+        always_run: true
       - id: prettier
         name: 💄 Ensuring files are prettier
         language: system
@@ -132,6 +132,12 @@ repos:
         language: system
         types: [python]
         entry: npm run pyright
+        pass_filenames: false
+      - id: pytest
+        name: 🧪 Running tests and test coverage with pytest
+        language: system
+        types: [python]
+        entry: poetry run pytest
         pass_filenames: false
       - id: pyupgrade
         name: 🆙 Checking for upgradable syntax with pyupgrade

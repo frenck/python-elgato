@@ -145,7 +145,7 @@ class Elgato:
         state = {}
 
         if on is not None:
-            state["on"] = 1 if on else 0
+            state["on"] = int(on)
 
         if brightness is not None:
             state["brightness"] = brightness
