@@ -16,13 +16,25 @@ jobs:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
       - name: 🏗 Set up Python ${{ matrix.python }}
+        id: python
         uses: actions/setup-python@v2.2.1
         with:
           python-version: ${{ matrix.python }}
-      - name: 🏗 Install dependencies
+      - name: ⤵️ Restore cached Python virtual environment
+        id: cached-poetry-dependencies
+        uses: actions/cache@v2.1.4
+        with:
+          path: .venv
+          key: >-
+            venv-${{ runner.os }}-${{ steps.python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
+            venv-${{ runner.os }}-${{ steps.python.outputs.python-version }}-
+      - name: 🏗 Install workflow dependencies
         run: |
           pip install -r .github/workflows/requirements.txt
-          poetry install
+          poetry config virtualenvs.create true
+          poetry config virtualenvs.in-project true
+      - name: 🏗 Install dependencies
+        run: poetry install
       - name: 🚀 Run pytest
         run: poetry run pytest --cov elgato tests
       - name: ⬆️ Upload coverage artifact
@@ -39,14 +51,26 @@ jobs:
         uses: actions/checkout@v2.3.4
       - name: ⬇️ Download coverage data
         uses: actions/download-artifact@v2.0.8
-      - name: 🏗 Set up Python 3.8
+      - name: 🏗 Set up Python ${{ matrix.python }}
+        id: python
         uses: actions/setup-python@v2.2.1
         with:
-          python-version: 3.8
-      - name: 🏗 Install dependencies
+          python-version: ${{ matrix.python }}
+      - name: ⤵️ Restore cached Python virtual environment
+        id: cached-poetry-dependencies
+        uses: actions/cache@v2.1.4
+        with:
+          path: .venv
+          key: >-
+            venv-${{ runner.os }}-${{ steps.python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
+            venv-${{ runner.os }}-${{ steps.python.outputs.python-version }}-
+      - name: 🏗 Install workflow dependencies
         run: |
           pip install -r .github/workflows/requirements.txt
-          poetry install
+          poetry config virtualenvs.create true
+          poetry config virtualenvs.in-project true
+      - name: 🏗 Install dependencies
+        run: poetry install
       - name: 🚀 Process coverage results
         run: |
           poetry run coverage combine coverage*/.coverage*
