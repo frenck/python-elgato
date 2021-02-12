@@ -20,21 +20,32 @@ jobs:
         uses: actions/setup-python@v2.2.1
         with:
           python-version: ${{ matrix.python }}
-      - name: ⤵️ Restore cached Python virtual environment
-        id: cached-poetry-dependencies
-        uses: actions/cache@v2.1.4
+      - name: 🏗 Get pip cache dir
+        id: pip-cache
+        run: |
+          echo "::set-output name=dir::$(pip cache dir)"
+      - name: ⤵️ Restore cached Python PIP packages
+        uses: actions/cache@v2
         with:
-          path: .venv
-          key: >-
-            venv-${{ runner.os }}-${{ steps.python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
-            venv-${{ runner.os }}-${{ steps.python.outputs.python-version }}-
+          path: ${{ steps.pip-cache.outputs.dir }}
+          key: pip-${{ runner.os }}-${{ steps.python.outputs.python-version }}-${{ hashFiles('.github/workflows/requirements.txt') }}
+          restore-keys: |
+            pip-${{ runner.os }}-${{ steps.python.outputs.python-version }}-
       - name: 🏗 Install workflow dependencies
         run: |
           pip install -r .github/workflows/requirements.txt
           poetry config virtualenvs.create true
           poetry config virtualenvs.in-project true
+      - name: ⤵️ Restore cached Python virtual environment
+        id: cached-poetry-dependencies
+        uses: actions/cache@v2.1.4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
+          restore-keys: |
+            venv-${{ runner.os }}-${{ steps.python.outputs.python-version }}-
       - name: 🏗 Install dependencies
-        run: poetry install
+        run: poetry install --no-interaction
       - name: 🚀 Run pytest
         run: poetry run pytest --cov elgato tests
       - name: ⬆️ Upload coverage artifact
@@ -56,6 +67,22 @@ jobs:
         uses: actions/setup-python@v2.2.1
         with:
           python-version: 3.9
+      - name: 🏗 Get pip cache dir
+        id: pip-cache
+        run: |
+          echo "::set-output name=dir::$(pip cache dir)"
+      - name: ⤵️ Restore cached Python PIP packages
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.pip-cache.outputs.dir }}
+          key: pip-${{ runner.os }}-${{ steps.python.outputs.python-version }}-${{ hashFiles('.github/workflows/requirements.txt') }}
+          restore-keys: |
+            pip-${{ runner.os }}-${{ steps.python.outputs.python-version }}-
+      - name: 🏗 Install workflow dependencies
+        run: |
+          pip install -r .github/workflows/requirements.txt
+          poetry config virtualenvs.create true
+          poetry config virtualenvs.in-project true
       - name: ⤵️ Restore cached Python virtual environment
         id: cached-poetry-dependencies
         uses: actions/cache@v2.1.4
@@ -64,13 +91,8 @@ jobs:
           key: >-
             venv-${{ runner.os }}-${{ steps.python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
             venv-${{ runner.os }}-${{ steps.python.outputs.python-version }}-
-      - name: 🏗 Install workflow dependencies
-        run: |
-          pip install -r .github/workflows/requirements.txt
-          poetry config virtualenvs.create true
-          poetry config virtualenvs.in-project true
       - name: 🏗 Install dependencies
-        run: poetry install
+        run: poetry install --no-interaction
       - name: 🚀 Process coverage results
         run: |
           poetry run coverage combine coverage*/.coverage*
