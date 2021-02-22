@@ -357,7 +357,7 @@ flake8 = "*"
 
 [[package]]
 name = "flake8-simplify"
-version = "0.13.0"
+version = "0.14.0"
 description = "flake8 plugin which checks for code that can be simpified"
 category = "dev"
 optional = false
@@ -922,7 +922,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "412693feebd42297aff64753584fd678bbcfd12d97a6bc5950f79ce9c24b0e33"
+content-hash = "afc7f8f1f28a4f5db569308af592b0165843898b9da9daf9743255ad2d8394f7"
 
 [metadata.files]
 aiohttp = [
@@ -1129,8 +1129,8 @@ flake8-polyfill = [
     {file = "flake8_polyfill-1.0.2-py2.py3-none-any.whl", hash = "sha256:12be6a34ee3ab795b19ca73505e7b55826d5f6ad7230d31b18e106400169b9e9"},
 ]
 flake8-simplify = [
-    {file = "flake8_simplify-0.13.0-py3-none-any.whl", hash = "sha256:c31f8d825c701b77523acf46fb5f6a752eb9b6f72de8a5e3b1ac8788d192e60c"},
-    {file = "flake8_simplify-0.13.0.tar.gz", hash = "sha256:f4892d8169bbd1519545f801224f6c66de6a105802101a9fa7f98dc935ad22b4"},
+    {file = "flake8_simplify-0.14.0-py3-none-any.whl", hash = "sha256:5793b3c7bd826d7489580f8146bbd40d5bface15d9be5020ddbf07980b844709"},
+    {file = "flake8_simplify-0.14.0.tar.gz", hash = "sha256:365d0b812fc708af2286a8364ed7b23715bb873431c7f3188bc0b4cd6dcb3c0a"},
 ]
 gitdb = [
     {file = "gitdb-4.0.5-py3-none-any.whl", hash = "sha256:91f36bfb1ab7949b3b40e23736db18231bf7593edada2ba5c3a174a7b23657ac"},
