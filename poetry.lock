@@ -127,7 +127,7 @@ d = ["aiohttp (>=3.3.2)", "aiohttp-cors"]
 
 [[package]]
 name = "blacken-docs"
-version = "1.9.2"
+version = "1.10.0"
 description = "Run `black` on python code blocks in documentation files"
 category = "dev"
 optional = false
@@ -924,7 +924,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "645a8a0658e107b08331b89c0eadfac5dde709c5a98501fb6c794311a6110978"
+content-hash = "d331229f4e81e3a7cb16f5cefb3ace3012531d59eb55932f9fc4bf332690b00d"
 
 [metadata.files]
 aiohttp = [
@@ -1002,8 +1002,8 @@ black = [
     {file = "black-20.8b1.tar.gz", hash = "sha256:1c02557aa099101b9d21496f8a914e9ed2222ef70336404eeeac8edba836fbea"},
 ]
 blacken-docs = [
-    {file = "blacken_docs-1.9.2-py2.py3-none-any.whl", hash = "sha256:b73f4f7cab4630a0a8aabe559032a7ba20df1cccf8965881e969aa8d1d4c449e"},
-    {file = "blacken_docs-1.9.2.tar.gz", hash = "sha256:eb23a979da615faf5f6d682a7409dae9e2b29cc054fc9b903df6133e5b46c2e4"},
+    {file = "blacken_docs-1.10.0-py2.py3-none-any.whl", hash = "sha256:149197a0b17e83121fc10aca9eda1417728fdccebde930a6722f97d87ed30f4b"},
+    {file = "blacken_docs-1.10.0.tar.gz", hash = "sha256:e2121c95bf2f8a3ebb3110776d276f850f63b8e5753773ba2b4d0f415d862f23"},
 ]
 certifi = [
     {file = "certifi-2020.12.5-py2.py3-none-any.whl", hash = "sha256:719a74fb9e33b9bd44cc7f3a8d94bc35e4049deebe19ba7d8e108280cfd59830"},
@@ -1037,6 +1037,9 @@ coverage = [
     {file = "coverage-5.5-cp27-cp27mu-manylinux1_x86_64.whl", hash = "sha256:8963a499849a1fc54b35b1c9f162f4108017b2e6db2c46c1bed93a72262ed083"},
     {file = "coverage-5.5-cp27-cp27mu-manylinux2010_i686.whl", hash = "sha256:869a64f53488f40fa5b5b9dcb9e9b2962a66a87dab37790f3fcfb5144b996ef5"},
     {file = "coverage-5.5-cp27-cp27mu-manylinux2010_x86_64.whl", hash = "sha256:4a7697d8cb0f27399b0e393c0b90f0f1e40c82023ea4d45d22bce7032a5d7b81"},
+    {file = "coverage-5.5-cp310-cp310-macosx_10_14_x86_64.whl", hash = "sha256:8d0a0725ad7c1a0bcd8d1b437e191107d457e2ec1084b9f190630a4fb1af78e6"},
+    {file = "coverage-5.5-cp310-cp310-manylinux1_x86_64.whl", hash = "sha256:51cb9476a3987c8967ebab3f0fe144819781fca264f57f89760037a2ea191cb0"},
+    {file = "coverage-5.5-cp310-cp310-win_amd64.whl", hash = "sha256:c0891a6a97b09c1f3e073a890514d5012eb256845c451bd48f7968ef939bf4ae"},
     {file = "coverage-5.5-cp35-cp35m-macosx_10_9_x86_64.whl", hash = "sha256:3487286bc29a5aa4b93a072e9592f22254291ce96a9fbc5251f566b6b7343cdb"},
     {file = "coverage-5.5-cp35-cp35m-manylinux1_i686.whl", hash = "sha256:deee1077aae10d8fa88cb02c845cfba9b62c55e1183f52f6ae6a2df6a2187160"},
     {file = "coverage-5.5-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:f11642dddbb0253cc8853254301b51390ba0081750a8ac03f20ea8103f0c56b6"},
