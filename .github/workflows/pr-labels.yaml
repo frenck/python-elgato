@@ -1,0 +1,20 @@
+---
+name: PR Labels
+
+# yamllint disable-line rule:truthy
+on:
+  pull_request_target:
+    types: [opened, labeled, unlabeled, synchronize]
+
+jobs:
+  pr_labels:
+    name: 🏷 Verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🏷 Verify PR has a valid label
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          valid-labels: >-
+            breaking-change, bugfix, documentation, enhancement,
+            refactor, performance, new-feature, maintenance, ci, dependencies
+          pull-request-number: "${{ github.event.pull_request.number }}"
