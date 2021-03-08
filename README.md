@@ -1,6 +1,7 @@
 # Python: Asynchronous client for Elgato Key Lights
 
 [![GitHub Release][releases-shield]][releases]
+[![Python Versions][python-versions-shield]][pypi]
 ![Project Stage][project-stage-shield]
 ![Project Maintenance][maintenance-shield]
 [![License][license-shield]](LICENSE.md)
@@ -8,6 +9,7 @@
 [![Build Status][build-shield]][build]
 [![Code Coverage][codecov-shield]][codecov]
 [![Code Quality][code-quality-shield]][code-quality]
+[![Deepcode.ai][deepcode-shield]][deepcode]
 
 [![Sponsor Frenck via GitHub Sponsors][github-sponsors-shield]][github-sponsors]
 
@@ -79,42 +81,33 @@ Thank you for being involved! :heart_eyes:
 
 ## Setting up development environment
 
-In case you'd like to contribute, a `Makefile` has been included to ensure a
-quick start.
+This Python project is fully managed using the [Poetry][poetry] dependency manager. But also relies on the use of NodeJS for certain checks during development.
+
+You need at least:
+
+- Python 3.7+
+- [Poetry][poetry-install]
+- NodeJS 12+ (including NPM)
+
+To install all packages, including all development requirements:
 
 ```bash
-make venv
-source ./venv/bin/activate
-make dev
+npm install
+poetry install
 ```
 
-Now you can start developing, run `make` without arguments to get an overview
-of all make goals that are available (including description):
+As this repository uses the [pre-commit][pre-commit] framework, all changes
+are linted and tested with each commit. You can run all checks and tests
+manually, using the following command:
 
 ```bash
-$ make
-Asynchronous Python client for Elgato Key Lights.
+poetry run pre-commit run --all-files
+```
 
-Usage:
-  make help                            Shows this message.
-  make dev                             Set up a development environment.
-  make lint                            Run all linters.
-  make lint-black                      Run linting using black & blacken-docs.
-  make lint-flake8                     Run linting using flake8 (pycodestyle/pydocstyle).
-  make lint-pylint                     Run linting using PyLint.
-  make lint-mypy                       Run linting using MyPy.
-  make test                            Run tests quickly with the default Python.
-  make coverage                        Check code coverage quickly with the default Python.
-  make install                         Install the package to the active Python's site-packages.
-  make clean                           Removes build, test, coverage and Python artifacts.
-  make clean-all                       Removes all venv, build, test, coverage and Python artifacts.
-  make clean-build                     Removes build artifacts.
-  make clean-pyc                       Removes Python file artifacts.
-  make clean-test                      Removes test and coverage artifacts.
-  make clean-venv                      Removes Python virtual environment artifacts.
-  make dist                            Builds source and wheel package.
-  make release                         Release build on PyP
-  make venv                            Create Python venv environment.
+To run just the Python tests:
+
+```bash
+poetry run pytest
 ```
 
 ## Authors & contributors
@@ -155,6 +148,8 @@ SOFTWARE.
 [codecov-shield]: https://codecov.io/gh/frenck/python-elgato/branch/master/graph/badge.svg
 [codecov]: https://codecov.io/gh/frenck/python-elgato
 [contributors]: https://github.com/frenck/python-elgato/graphs/contributors
+[deepcode-shield]: https://www.deepcode.ai/api/gh/badge?key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwbGF0Zm9ybTEiOiJnaCIsIm93bmVyMSI6ImZyZW5jayIsInJlcG8xIjoicHl0aG9uLWVsZ2F0byIsImluY2x1ZGVMaW50IjpmYWxzZSwiYXV0aG9ySWQiOjI4MDU1LCJpYXQiOjE2MTUxODgzODh9.hJsD6PTw8K8bnTmHUzroQi7XkXRi46bdt-oMqx2zXj0
+[deepcode]: https://www.deepcode.ai/app/gh/frenck/python-elgato/_/dashboard?utm_content=gh%2Ffrenck%2Fpython-elgato
 [frenck]: https://github.com/frenck
 [github-sponsors-shield]: https://frenck.dev/wp-content/uploads/2019/12/github_sponsor.png
 [github-sponsors]: https://github.com/sponsors/frenck
@@ -163,7 +158,12 @@ SOFTWARE.
 [maintenance-shield]: https://img.shields.io/maintenance/yes/2021.svg
 [patreon-shield]: https://frenck.dev/wp-content/uploads/2019/12/patreon.png
 [patreon]: https://www.patreon.com/frenck
+[poetry-install]: https://python-poetry.org/docs/#installation
+[poetry]: https://python-poetry.org
+[pre-commit]: https://pre-commit.com/
 [project-stage-shield]: https://img.shields.io/badge/project%20stage-production%20ready-brightgreen.svg
+[pypi]: https://pypi.org/project/elgato/
+[python-versions-shield]: https://img.shields.io/pypi/pyversions/elgato
 [releases-shield]: https://img.shields.io/github/release/frenck/python-elgato.svg
 [releases]: https://github.com/frenck/python-elgato/releases
 [semver]: http://semver.org/spec/v2.0.0.html
