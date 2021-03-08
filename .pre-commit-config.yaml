@@ -2,6 +2,13 @@
 repos:
   - repo: local
     hooks:
+      - id: bandit
+        name: 🎰 Checking using bandit
+        language: system
+        types: [python]
+        entry: poetry run bandit
+        files: ^src/
+        require_serial: true
       - id: black
         name: ☕️ Format using black
         language: system
