@@ -25,9 +25,9 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 aiohttp = ">=3.0.0"
-yarl = "^1.6.3"
+yarl = ">=1.6.0"
 
 [tool.poetry.dev-dependencies]
 aresponses = "^2.1.4"
