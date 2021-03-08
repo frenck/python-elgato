@@ -74,11 +74,11 @@ jobs:
         with:
           python-version: 3.8
       - name: 🏗 Read .nvmrc
-        if: matrix.id == "prettier"
+        if: ${{ matrix.id == "prettier" }}
         id: nvm
         run: echo "##[set-output name=nvmrc;]$(cat .nvmrc)"
       - name: 🏗 Set up Node.js ${{ steps.nvm.outputs.nvmrc }}
-        if: matrix.id == "prettier"
+        if: ${{ matrix.id == "prettier" }}
         uses: actions/setup-node@v2.1.5
         with:
           node-version: "${{ steps.nvm.outputs.nvmrc }}"
@@ -109,12 +109,12 @@ jobs:
       - name: 🏗 Install Python dependencies
         run: poetry install --no-interaction
       - name: 🏗  Get npm cache directory
-        if: matrix.id == "prettier"
+        if: ${{ matrix.id == "prettier" }}
         id: npm-cache
         run: |
           echo "::set-output name=dir::$(npm config get cache)"
       - name: ⤵️ Restore cached node modules
-        if: matrix.id == "prettier"
+        if: ${{ matrix.id == "prettier" }}
         uses: actions/cache@v2.1.4
         with:
           path: ${{ steps.npm-cache.outputs.dir }}
@@ -122,7 +122,7 @@ jobs:
           restore-keys: |
             node-${{ runner.os }}-${{ steps.nvm.outputs.nvmrc }}-
       - name: 🏗 Install NPM dependencies
-        if: matrix.id == "prettier"
+        if: ${{ matrix.id == "prettier" }}
         run: npm install
       - name: 🚀 Run pre-commit for ${{ matrix.id }}
         run: poetry run pre-commit run ${{ matrix.id }} --all-files
