@@ -91,6 +91,7 @@ async def test_timeout(aresponses):
     """Test request timeout from the Elgato Key Light."""
     # Faking a timeout by sleeping
     async def response_handler(_):
+        """Response handler for this test."""
         await asyncio.sleep(2)
         return aresponses.Response(body="Goodmorning!")
 
@@ -139,6 +140,7 @@ async def test_light_on(aresponses):
     """Test controlling a Elgato Key Light."""
     # Handle to run asserts on request in
     async def response_handler(request):
+        """Response handler for this test."""
         data = await request.json()
         assert data == {
             "numberOfLights": 1,
@@ -167,6 +169,7 @@ async def test_light_off(aresponses):
     """Test turning off an Elgato Key Light."""
     # Handle to run asserts on request in
     async def response_handler(request):
+        """Response handler for this test."""
         data = await request.json()
         assert data == {
             "numberOfLights": 1,
@@ -195,6 +198,7 @@ async def test_light_no_on_off(aresponses):
     """Test controlling an Elgato Key Light without turning it on/off."""
     # Handle to run asserts on request in
     async def response_handler(request):
+        """Response handler for this test."""
         data = await request.json()
         assert data == {
             "numberOfLights": 1,

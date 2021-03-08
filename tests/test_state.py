@@ -34,6 +34,7 @@ async def test_change_state(aresponses):
     """Test changing Elgato Key Light State."""
 
     async def response_handler(request):
+        """Response handler for this test."""
         data = await request.json()
         assert data == {
             "numberOfLights": 1,
