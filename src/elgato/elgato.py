@@ -22,7 +22,7 @@ class Elgato:
         host: str,
         port: int = 9123,
         request_timeout: int = 8,
-        session: aiohttp.client.ClientSession = None,
+        session: aiohttp.client.ClientSession | None = None,
     ) -> None:
         """Initialize connection with the Elgato Key Light.
 
@@ -45,7 +45,7 @@ class Elgato:
         self,
         uri: str,
         data: dict | None = None,
-    ) -> Any:
+    ) -> dict[str, Any]:
         """Handle a request to a Elgato Key Light device.
 
         A generic method for sending/handling HTTP requests done against
