@@ -3,7 +3,7 @@ name: PR Labels
 
 # yamllint disable-line rule:truthy
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, labeled, unlabeled, synchronize]
 
 jobs:
@@ -18,4 +18,4 @@ jobs:
           valid-labels: >-
             breaking-change, bugfix, documentation, enhancement,
             refactor, performance, new-feature, maintenance, ci, dependencies
-          pull-request-number: "${{ github.event.pull_request.number }}"
+          disable-reviews: true
