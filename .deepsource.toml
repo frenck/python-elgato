@@ -1,5 +1,7 @@
 version = 1
 
+test_patterns = ["tests/**"]
+
 [[analyzers]]
 name = "python"
 enabled = true
@@ -9,4 +11,8 @@ enabled = true
 
 [[analyzers]]
 name = "test-coverage"
+enabled = true
+
+[[analyzers]]
+name = "secrets"
 enabled = true
