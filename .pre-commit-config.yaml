@@ -64,6 +64,12 @@ repos:
         language: system
         types: [yaml]
         entry: poetry run check-yaml
+      - id: codespell
+        name: ✅ Check code for common misspellings
+        language: system
+        types: [text]
+        exclude: ^poetry\.lock$
+        entry: poetry run codespell
       - id: debug-statements
         name: 🪵  Debug Statements and imports (Python)
         language: system

@@ -12,7 +12,7 @@ class State:
     Represents a visible state of an Elgato Key Light.
 
     Attributes:
-        on: A boolean indiciating the if the light if on or off.
+        on: A boolean indicating the if the light if on or off.
         brightness: An integer between 0 and 255, representing the brightness.
         temperature: An integer representing the color temperature in mireds.
     """
