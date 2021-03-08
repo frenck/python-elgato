@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "elgato"
-version = "1.0.0"
+version = "0.0.0"
 description = "Asynchronous Python client for Elgato Key Lights."
 authors = ["Franck Nijhof <opensource@frenck.dev>"]
 maintainers = ["Franck Nijhof <opensource@frenck.dev>"]
