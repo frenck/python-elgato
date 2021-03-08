@@ -1,4 +1,4 @@
-"""Tests for retreiving information from the Elgato Key Light device."""
+"""Tests for retrieving information from the Elgato Key Light device."""
 import aiohttp
 import pytest
 
