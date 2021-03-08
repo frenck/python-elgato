@@ -148,8 +148,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[build-shield]: https://github.com/frenck/python-elgato/workflows/Continuous%20Integration/badge.svg
-[build]: https://github.com/frenck/python-elgato/actions
+[build-shield]: https://github.com/frenck/python-elgato/actions/workflows/tests.yaml/badge.svg
+[build]: https://github.com/frenck/python-elgato/actions/workflows/tests.yaml
 [code-quality-shield]: https://img.shields.io/lgtm/grade/python/g/frenck/python-elgato.svg?logo=lgtm&logoWidth=18
 [code-quality]: https://lgtm.com/projects/g/frenck/python-elgato/context:python
 [codecov-shield]: https://codecov.io/gh/frenck/python-elgato/branch/master/graph/badge.svg
