@@ -1,9 +1,9 @@
-"""Exceptions for Elgato Key Lights."""
+"""Exceptions for Elgato Lights."""
 
 
 class ElgatoError(Exception):
-    """Generic Elgato Key Light exception."""
+    """Generic Elgato Light exception."""
 
 
 class ElgatoConnectionError(ElgatoError):
-    """Elgato Key Light connection exception."""
+    """Elgato Light connection exception."""

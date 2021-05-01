@@ -1,4 +1,4 @@
-"""Tests for the Elgato Key Lights Library."""
+"""Tests for the Elgato Lights Library."""
 # pylint: disable=protected-access
 import asyncio
 
@@ -62,13 +62,32 @@ async def test_put_request(aresponses):
     )
     async with aiohttp.ClientSession() as session:
         elgato = Elgato("example.com", session=session)
-        response = await elgato._request("test", data={})
+        response = await elgato._request("test", method=aiohttp.hdrs.METH_PUT, data={})
+        assert response["status"] == "ok"
+
+
+@pytest.mark.asyncio
+async def test_post_request(aresponses):
+    """Test POST requests are handled correctly."""
+    aresponses.add(
+        "example.com:9123",
+        "/elgato/test",
+        "POST",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text='{"status": "ok"}',
+        ),
+    )
+    async with aiohttp.ClientSession() as session:
+        elgato = Elgato("example.com", session=session)
+        response = await elgato._request("test", method=aiohttp.hdrs.METH_POST, data={})
         assert response["status"] == "ok"
 
 
 @pytest.mark.asyncio
 async def test_request_port(aresponses):
-    """Test the Elgato Key Light running on non-standard port."""
+    """Test the Elgato Light running on non-standard port."""
     aresponses.add(
         "example.com:3333",
         "/elgato/test",
@@ -88,7 +107,7 @@ async def test_request_port(aresponses):
 
 @pytest.mark.asyncio
 async def test_timeout(aresponses):
-    """Test request timeout from the Elgato Key Light."""
+    """Test request timeout from the Elgato Light."""
     # Faking a timeout by sleeping
     async def response_handler(_):
         """Response handler for this test."""
@@ -137,7 +156,7 @@ async def test_unexpected_response(aresponses):
 
 @pytest.mark.asyncio
 async def test_light_on(aresponses):
-    """Test controlling a Elgato Key Light."""
+    """Test controlling a Elgato Light."""
     # Handle to run asserts on request in
     async def response_handler(request):
         """Response handler for this test."""
@@ -166,7 +185,7 @@ async def test_light_on(aresponses):
 
 @pytest.mark.asyncio
 async def test_light_off(aresponses):
-    """Test turning off an Elgato Key Light."""
+    """Test turning off an Elgato Light."""
     # Handle to run asserts on request in
     async def response_handler(request):
         """Response handler for this test."""
@@ -195,7 +214,7 @@ async def test_light_off(aresponses):
 
 @pytest.mark.asyncio
 async def test_light_no_on_off(aresponses):
-    """Test controlling an Elgato Key Light without turning it on/off."""
+    """Test controlling an Elgato Light without turning it on/off."""
     # Handle to run asserts on request in
     async def response_handler(request):
         """Response handler for this test."""

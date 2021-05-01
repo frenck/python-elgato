@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "elgato"
 version = "0.0.0"
-description = "Asynchronous Python client for Elgato Key Lights."
+description = "Asynchronous Python client for Elgato Lights."
 authors = ["Franck Nijhof <opensource@frenck.dev>"]
 maintainers = ["Franck Nijhof <opensource@frenck.dev>"]
 license = "MIT"
@@ -98,6 +98,9 @@ good-names = [
     "Run",
     "T",
 ]
+
+[tool.pylint.DESIGN]
+max-attributes = 8
 
 [tool.pylint."MESSAGES CONTROL"]
 disable= [

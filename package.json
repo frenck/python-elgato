@@ -2,7 +2,7 @@
   "name": "elgato",
   "version": "0.0.0",
   "private": true,
-  "description": "Asynchronous Python client for Elgato Key Lights",
+  "description": "Asynchronous Python client for Elgato Lights",
   "scripts": {
     "pyright": "pyright",
     "prettier": "prettier --write **/*.{json,js,md,yml,yaml}"
