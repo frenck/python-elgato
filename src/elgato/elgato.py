@@ -180,7 +180,7 @@ class Elgato:
         if temperature and (hue or saturation):
             raise ElgatoError("Cannot set temperature together with hue or saturation")
 
-        class LightState(TypedDict, total=False):
+        class LightState(TypedDict, total=False):  # lgtm [py/unused-local-variable]
             """Describe state dictionary that can be set on a light."""
 
             brightness: int
