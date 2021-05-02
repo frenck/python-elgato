@@ -1,4 +1,4 @@
-"""Asynchronous Python client for Elgato Key Lights."""
+"""Asynchronous Python client for Elgato Lights."""
 import os
 
 

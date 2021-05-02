@@ -1,4 +1,4 @@
-"""Asynchronous Python client for Elgato Key Lights."""
+"""Asynchronous Python client for Elgato Lights."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -6,81 +6,142 @@ from typing import Any
 
 
 @dataclass
-class State:
-    """Object holding the Elgato Key Light state.
-
-    Represents a visible state of an Elgato Key Light.
-
-    Attributes:
-        on: A boolean indicating the if the light if on or off.
-        brightness: An integer between 0 and 255, representing the brightness.
-        temperature: An integer representing the color temperature in mireds.
-    """
-
-    on: bool
-    brightness: int
-    temperature: int
-
-    @staticmethod
-    def from_dict(data: dict[str, Any]) -> State:
-        """Return a State object from a Elgato Key Light API response.
-
-        Converts a dictionary, obtained from an Elgato Key Light's API into
-        a State object.
-
-        Args:
-            data: The state response from the Elgato Key Light's API.
-
-        Returns:
-            A state object.
-        """
-        return State(
-            on=(data["lights"][0]["on"] == 1),
-            brightness=data["lights"][0]["brightness"],
-            temperature=data["lights"][0]["temperature"],
-        )
-
-
-@dataclass
 class Info:
-    """Object holding the Elgato Key Light device information.
+    """Object holding the Elgato Light device information.
 
-    This object holds information about the Elgato Key Light.
+    This object holds information about the Elgato Light.
 
     Attributes:
-        product_name: The product name.
-        hardware_board_type: An integer indicating the board revision.
+        display_name: Configured display name of the Elgato Light.
+        features: List of features this devices exposes.
         firmware_build_number: An integer with the build number of the firmware.
         firmware_version: String containing the firmware version.
-        serial_number: Serial number of the Elgato Key Light.
-        display_name: Configured display name of the Elgato Key Light.
+        hardware_board_type: An integer indicating the board revision.
+        product_name: The product name.
+        serial_number: Serial number of the Elgato Light.
     """
 
-    product_name: str
-    hardware_board_type: int
+    display_name: str
+    features: list[str]
     firmware_build_number: int
     firmware_version: str
+    hardware_board_type: int
+    product_name: str
     serial_number: str
-    display_name: str
 
     @staticmethod
     def from_dict(data: dict[str, Any]) -> Info:
-        """Return a Info object from a Elgato Key Light API response.
+        """Return a Info object from a Elgato Light API response.
 
-        Converts a dictionary, obtained from an Elgato Key Light's API into
+        Converts a dictionary, obtained from an Elgato Light's API into
         a Info object.
 
         Args:
-            data: The info response from the Elgato Key Light's API.
+            data: The info response from the Elgato Light's API.
 
         Returns:
             An info object.
         """
         return Info(
-            product_name=data["productName"],
-            hardware_board_type=data["hardwareBoardType"],
+            display_name=data["displayName"],
+            features=data["features"],
             firmware_build_number=data["firmwareBuildNumber"],
             firmware_version=data["firmwareVersion"],
+            hardware_board_type=data["hardwareBoardType"],
+            product_name=data["productName"],
             serial_number=data["serialNumber"],
-            display_name=data["displayName"],
+        )
+
+
+@dataclass
+class Settings:
+    """Object holding the Elgato Light device settings.
+
+    This object holds information about the Elgato Light settings.
+
+    Attributes:
+        color_change_duration: Transition time of color changes in milliseconds.
+        power_on_behavior: 1 = Restore last, 2 = Use defaults.
+        power_on_brightness: The brightness used as default.
+        power_on_hue: The hue value used as default.
+        power_on_saturation: The saturation level used as default.
+        power_on_temperature: The temperature level used as default.
+        switch_off_duration: Turn off transition time in milliseconds.
+        switch_on_duration: Turn on transition time in milliseconds.
+    """
+
+    color_change_duration: int
+    power_on_behavior: bool
+    power_on_brightness: int
+    power_on_hue: float | None
+    power_on_saturation: float | None
+    power_on_temperature: int
+    switch_off_duration: int
+    switch_on_duration: int
+
+    @staticmethod
+    def from_dict(data: dict[str, Any]) -> Settings:
+        """Return a Settings object from a Elgato Light API response.
+
+        Converts a dictionary, obtained from an Elgato Light's API into
+        a Settings object.
+
+        Args:
+            data: The setting response from the Elgato Light's API.
+
+        Returns:
+            An settings object.
+        """
+        return Settings(
+            color_change_duration=data["colorChangeDurationMs"],
+            power_on_behavior=data["powerOnBehavior"],
+            power_on_brightness=data["powerOnBrightness"],
+            power_on_hue=data.get("powerOnHue"),
+            power_on_saturation=data.get("powerOnSaturation"),
+            power_on_temperature=data["powerOnTemperature"],
+            switch_off_duration=data["switchOffDurationMs"],
+            switch_on_duration=data["switchOnDurationMs"],
+        )
+
+
+@dataclass
+class State:
+    """Object holding the Elgato Light state.
+
+    Represents a visible state of an Elgato Light.
+
+    Attributes:
+        on: A boolean indicating the if the light if on or off.
+        brightness: An integer between 0 and 255, representing the brightness.
+        hue:
+        saturation:
+        temperature: An integer representing the color temperature in mireds.
+    """
+
+    on: bool
+    brightness: int
+    hue: float | None
+    saturation: float | None
+    temperature: int | None
+
+    @staticmethod
+    def from_dict(data: dict[str, Any]) -> State:
+        """Return a State object from a Elgato Light API response.
+
+        Converts a dictionary, obtained from an Elgato Light's API into
+        a State object.
+
+        Args:
+            data: The state response from the Elgato Light's API.
+
+        Returns:
+            A state object.
+        """
+        state = data["lights"][0]
+        return State(
+            on=(state["on"] == 1),
+            brightness=state["brightness"],
+            hue=state.get("hue"),
+            saturation=state.get("saturation"),
+            temperature=state.get("temperature"),
         )

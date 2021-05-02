@@ -1,4 +1,4 @@
-# Python: Asynchronous client for Elgato Key Lights
+# Python: Asynchronous client for Elgato Lights
 
 [![GitHub Release][releases-shield]][releases]
 [![Python Versions][python-versions-shield]][pypi]
@@ -15,13 +15,19 @@
 
 [![Support Frenck on Patreon][patreon-shield]][patreon]
 
-Asynchronous Python client for Elgato Key Lights.
+Asynchronous Python client for Elgato Lights.
 
 ## About
 
-This package allows you to control and monitor Elgato Key Light devices
+This package allows you to control and monitor Elgato Light devices
 programmatically. It is mainly created to allow third-party programs to automate
-the behavior of an Elgato Key Light device.
+the behavior of an Elgato Light device.
+
+Known compatible and tested Elgato devices:
+
+- Elgato Key Light
+- Elgato Key Light Air
+- Elgato Light Strip
 
 ## Installation
 
@@ -38,7 +44,7 @@ from elgato import Elgato, State, Info
 
 
 async def main():
-    """Show example on controlling your Elgato Key Light device."""
+    """Show example on controlling your Elgato Light device."""
     async with Elgato("elgato-key-light.local") as elgato:
         info: Info = await elgato.info()
         print(info)
@@ -46,7 +52,7 @@ async def main():
         state: State = await elgato.state()
         print(state)
 
-        # Toggle the Key Light
+        # Toggle the Light
         await elgato.light(on=(not state.on))
 
 
@@ -85,7 +91,7 @@ This Python project is fully managed using the [Poetry][poetry] dependency manag
 
 You need at least:
 
-- Python 3.7+
+- Python 3.8+
 - [Poetry][poetry-install]
 - NodeJS 12+ (including NPM)
 
