@@ -75,7 +75,7 @@ class Settings:
     power_on_brightness: int
     power_on_hue: float | None
     power_on_saturation: float | None
-    power_on_temperature: int
+    power_on_temperature: int | None
     switch_off_duration: int
     switch_on_duration: int
 
@@ -98,7 +98,7 @@ class Settings:
             power_on_brightness=data["powerOnBrightness"],
             power_on_hue=data.get("powerOnHue"),
             power_on_saturation=data.get("powerOnSaturation"),
-            power_on_temperature=data["powerOnTemperature"],
+            power_on_temperature=data.get("powerOnTemperature"),
             switch_off_duration=data["switchOffDurationMs"],
             switch_on_duration=data["switchOnDurationMs"],
         )
