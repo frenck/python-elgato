@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import socket
+from dataclasses import dataclass
 from importlib import metadata
 from typing import Any, TypedDict
 
@@ -15,32 +16,16 @@ from .exceptions import ElgatoConnectionError, ElgatoError
 from .models import Info, Settings, State
 
 
+@dataclass
 class Elgato:
     """Main class for handling connections with an Elgato Light."""
 
-    def __init__(
-        self,
-        host: str,
-        port: int = 9123,
-        request_timeout: int = 8,
-        session: ClientSession | None = None,
-    ) -> None:
-        """Initialize connection with the Elgato Light.
+    host: str
+    port: int = 9123
+    request_timeout: int = 8
+    session: ClientSession | None = None
 
-        Constructor to set up the Elgato Light instance.
-
-        Args:
-            host: Hostname or IP address of the Elgato Light.
-            port: The port number, in general this is 9123 (default).
-            request_timeout: An integer with the request timeout in seconds.
-            session: Optional, shared, aiohttp client session.
-        """
-        self._session = session
-        self._close_session = False
-
-        self.host = host
-        self.port = port
-        self.request_timeout = request_timeout
+    _close_session: bool = False
 
     async def _request(
         self,
@@ -79,13 +64,13 @@ class Elgato:
             "Accept": "application/json, text/plain, */*",
         }
 
-        if self._session is None:
-            self._session = ClientSession()
+        if self.session is None:
+            self.session = ClientSession()
             self._close_session = True
 
         try:
             with async_timeout.timeout(self.request_timeout):
-                response = await self._session.request(
+                response = await self.session.request(
                     method,
                     url,
                     json=data,
@@ -223,8 +208,8 @@ class Elgato:
 
     async def close(self) -> None:
         """Close open client session."""
-        if self._session and self._close_session:
-            await self._session.close()
+        if self.session and self._close_session:
+            await self.session.close()
 
     async def __aenter__(self) -> Elgato:
         """Async enter.
