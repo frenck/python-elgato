@@ -157,7 +157,7 @@ repos:
         language: system
         types: [python]
         entry: poetry run pyupgrade
-        args: [--py36-plus]
+        args: [--py36-plus, --keep-runtime-typing]
       - id: trailing-whitespace
         name: ✄  Trim Trailing Whitespace
         language: system

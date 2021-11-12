@@ -29,6 +29,7 @@ packages = [
 python = "^3.8"
 aiohttp = ">=3.0.0"
 yarl = ">=1.6.0"
+pydantic = "^1.8.0"
 
 [tool.poetry.dev-dependencies]
 aresponses = "^2.1.4"
@@ -82,6 +83,9 @@ profile = "black"
 multi_line_output = 3
 
 [tool.pylint.MASTER]
+extension-pkg-whitelist = [
+  "pydantic"
+]
 ignore= [
   "tests"
 ]

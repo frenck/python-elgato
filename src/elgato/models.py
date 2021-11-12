@@ -1,12 +1,11 @@
 """Asynchronous Python client for Elgato Lights."""
-from __future__ import annotations
+from enum import IntEnum
+from typing import List, Optional
 
-from dataclasses import dataclass
-from typing import Any
+from pydantic import BaseModel, Field
 
 
-@dataclass
-class Info:
+class Info(BaseModel):
     """Object holding the Elgato Light device information.
 
     This object holds information about the Elgato Light.
@@ -21,40 +20,24 @@ class Info:
         serial_number: Serial number of the Elgato Light.
     """
 
-    display_name: str
-    features: list[str]
-    firmware_build_number: int
-    firmware_version: str
-    hardware_board_type: int
-    product_name: str
-    serial_number: str
-
-    @staticmethod
-    def from_dict(data: dict[str, Any]) -> Info:
-        """Return a Info object from a Elgato Light API response.
-
-        Converts a dictionary, obtained from an Elgato Light's API into
-        a Info object.
-
-        Args:
-            data: The info response from the Elgato Light's API.
-
-        Returns:
-            An info object.
-        """
-        return Info(
-            display_name=data["displayName"],
-            features=data["features"],
-            firmware_build_number=data["firmwareBuildNumber"],
-            firmware_version=data["firmwareVersion"],
-            hardware_board_type=data["hardwareBoardType"],
-            product_name=data["productName"],
-            serial_number=data["serialNumber"],
-        )
+    display_name: str = Field(..., alias="displayName")
+    firmware_build_number: int = Field(..., alias="firmwareBuildNumber")
+    firmware_version: str = Field(..., alias="firmwareVersion")
+    hardware_board_type: int = Field(..., alias="hardwareBoardType")
+    product_name: str = Field(..., alias="productName")
+    serial_number: str = Field(..., alias="serialNumber")
+    features: List[str] = Field(...)
 
 
-@dataclass
-class Settings:
+class PowerOnBehavior(IntEnum):
+    """Enum for the power on behavior of the Elgato Light."""
+
+    UNKNOWN = 0
+    RESTORE_LAST = 1
+    USE_DEFAULTS = 2
+
+
+class Settings(BaseModel):
     """Object holding the Elgato Light device settings.
 
     This object holds information about the Elgato Light settings.
@@ -70,42 +53,17 @@ class Settings:
         switch_on_duration: Turn on transition time in milliseconds.
     """
 
-    color_change_duration: int
-    power_on_behavior: bool
-    power_on_brightness: int
-    power_on_hue: float | None
-    power_on_saturation: float | None
-    power_on_temperature: int | None
-    switch_off_duration: int
-    switch_on_duration: int
-
-    @staticmethod
-    def from_dict(data: dict[str, Any]) -> Settings:
-        """Return a Settings object from a Elgato Light API response.
-
-        Converts a dictionary, obtained from an Elgato Light's API into
-        a Settings object.
-
-        Args:
-            data: The setting response from the Elgato Light's API.
-
-        Returns:
-            An settings object.
-        """
-        return Settings(
-            color_change_duration=data["colorChangeDurationMs"],
-            power_on_behavior=data["powerOnBehavior"],
-            power_on_brightness=data["powerOnBrightness"],
-            power_on_hue=data.get("powerOnHue"),
-            power_on_saturation=data.get("powerOnSaturation"),
-            power_on_temperature=data.get("powerOnTemperature"),
-            switch_off_duration=data["switchOffDurationMs"],
-            switch_on_duration=data["switchOnDurationMs"],
-        )
+    color_change_duration: int = Field(..., alias="colorChangeDurationMs")
+    power_on_behavior: PowerOnBehavior = Field(..., alias="powerOnBehavior")
+    power_on_brightness: int = Field(..., alias="powerOnBrightness")
+    power_on_hue: Optional[float] = Field(None, alias="powerOnHue")
+    power_on_saturation: Optional[float] = Field(None, alias="powerOnSaturation")
+    power_on_temperature: Optional[int] = Field(None, alias="powerOnTemperature")
+    switch_off_duration: int = Field(..., alias="switchOffDurationMs")
+    switch_on_duration: int = Field(..., alias="switchOnDurationMs")
 
 
-@dataclass
-class State:
+class State(BaseModel):
     """Object holding the Elgato Light state.
 
     Represents a visible state of an Elgato Light.
@@ -120,28 +78,6 @@ class State:
 
     on: bool
     brightness: int
-    hue: float | None
-    saturation: float | None
-    temperature: int | None
-
-    @staticmethod
-    def from_dict(data: dict[str, Any]) -> State:
-        """Return a State object from a Elgato Light API response.
-
-        Converts a dictionary, obtained from an Elgato Light's API into
-        a State object.
-
-        Args:
-            data: The state response from the Elgato Light's API.
-
-        Returns:
-            A state object.
-        """
-        state = data["lights"][0]
-        return State(
-            on=(state["on"] == 1),
-            brightness=state["brightness"],
-            hue=state.get("hue"),
-            saturation=state.get("saturation"),
-            temperature=state.get("temperature"),
-        )
+    hue: Optional[float]
+    saturation: Optional[float]
+    temperature: Optional[int]
