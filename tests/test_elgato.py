@@ -1,5 +1,7 @@
 """Tests for the Elgato Lights Library."""
 # pylint: disable=protected-access
+from __future__ import annotations
+
 import asyncio
 
 import aiohttp
