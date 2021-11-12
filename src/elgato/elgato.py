@@ -107,7 +107,7 @@ class Elgato:
             A Info object, with information about the Elgato Light device.
         """
         data = await self._request("accessory-info")
-        return Info.from_dict(data)
+        return Info.parse_obj(data)
 
     async def settings(self) -> Settings:
         """Get device settings from Elgato Light device.
@@ -116,7 +116,7 @@ class Elgato:
             A Settings object, with information about the Elgato Light device.
         """
         data = await self._request("lights/settings")
-        return Settings.from_dict(data)
+        return Settings.parse_obj(data)
 
     async def state(self) -> State:
         """Get the current state of Elgato Light device.
@@ -125,7 +125,7 @@ class Elgato:
             A State object, with the current Elgato Light state.
         """
         data = await self._request("lights")
-        return State.from_dict(data)
+        return State.parse_obj(data["lights"][0])
 
     async def identify(self) -> None:
         """Identify this Elgato Light device by making it blink."""
