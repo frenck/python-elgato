@@ -20,7 +20,7 @@ class Info(BaseModel):
         serial_number: Serial number of the Elgato Light.
     """
 
-    display_name: str = Field(..., alias="displayName")
+    display_name: str = Field("Elgato Light", alias="displayName")
     firmware_build_number: int = Field(..., alias="firmwareBuildNumber")
     firmware_version: str = Field(..., alias="firmwareVersion")
     hardware_board_type: int = Field(..., alias="hardwareBoardType")
