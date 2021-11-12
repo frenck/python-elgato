@@ -54,3 +54,23 @@ async def test_change_display_name(aresponses):
     async with aiohttp.ClientSession() as session:
         elgato = Elgato("example.com", session=session)
         await elgato.display_name("OMG PUPPIES")
+
+
+@pytest.mark.asyncio
+async def test_missing_display_name(aresponses):
+    """Test ensure we can handle a missing display name."""
+    aresponses.add(
+        "example.com:9123",
+        "/elgato/accessory-info",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text=load_fixture("info-light-strip.json"),
+        ),
+    )
+    async with aiohttp.ClientSession() as session:
+        elgato = Elgato("example.com", session=session)
+        info: Info = await elgato.info()
+        assert info
+        assert info.display_name == "Elgato Light"
