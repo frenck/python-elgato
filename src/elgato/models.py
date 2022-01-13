@@ -1,6 +1,6 @@
 """Asynchronous Python client for Elgato Lights."""
 from enum import IntEnum
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -26,7 +26,7 @@ class Info(BaseModel):
     hardware_board_type: int = Field(..., alias="hardwareBoardType")
     product_name: str = Field(..., alias="productName")
     serial_number: str = Field(..., alias="serialNumber")
-    features: List[str] = Field(...)
+    features: list[str] = Field(...)
 
 
 class PowerOnBehavior(IntEnum):

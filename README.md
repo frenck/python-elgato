@@ -91,9 +91,9 @@ This Python project is fully managed using the [Poetry][poetry] dependency manag
 
 You need at least:
 
-- Python 3.8+
+- Python 3.9+
 - [Poetry][poetry-install]
-- NodeJS 12+ (including NPM)
+- NodeJS 16+ (including NPM)
 
 To install all packages, including all development requirements:
 
