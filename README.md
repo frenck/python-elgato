@@ -8,8 +8,6 @@
 
 [![Build Status][build-shield]][build]
 [![Code Coverage][codecov-shield]][codecov]
-[![Code Quality][code-quality-shield]][code-quality]
-[![Deepcode.ai][deepcode-shield]][deepcode]
 
 [![Sponsor Frenck via GitHub Sponsors][github-sponsors-shield]][github-sponsors]
 
@@ -91,9 +89,9 @@ This Python project is fully managed using the [Poetry][poetry] dependency manag
 
 You need at least:
 
-- Python 3.9+
+- Python 3.10+
 - [Poetry][poetry-install]
-- NodeJS 16+ (including NPM)
+- NodeJS 18+ (including NPM)
 
 To install all packages, including all development requirements:
 
@@ -127,7 +125,7 @@ check [the contributor's page][contributors].
 
 MIT License
 
-Copyright (c) 2019-2022 Franck Nijhof
+Copyright (c) 2019-2023 Franck Nijhof
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -149,19 +147,15 @@ SOFTWARE.
 
 [build-shield]: https://github.com/frenck/python-elgato/actions/workflows/tests.yaml/badge.svg
 [build]: https://github.com/frenck/python-elgato/actions/workflows/tests.yaml
-[code-quality-shield]: https://img.shields.io/lgtm/grade/python/g/frenck/python-elgato.svg?logo=lgtm&logoWidth=18
-[code-quality]: https://lgtm.com/projects/g/frenck/python-elgato/context:python
 [codecov-shield]: https://codecov.io/gh/frenck/python-elgato/branch/master/graph/badge.svg
 [codecov]: https://codecov.io/gh/frenck/python-elgato
 [contributors]: https://github.com/frenck/python-elgato/graphs/contributors
-[deepcode-shield]: https://www.deepcode.ai/api/gh/badge?key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwbGF0Zm9ybTEiOiJnaCIsIm93bmVyMSI6ImZyZW5jayIsInJlcG8xIjoicHl0aG9uLWVsZ2F0byIsImluY2x1ZGVMaW50IjpmYWxzZSwiYXV0aG9ySWQiOjI4MDU1LCJpYXQiOjE2MTUxODgzODh9.hJsD6PTw8K8bnTmHUzroQi7XkXRi46bdt-oMqx2zXj0
-[deepcode]: https://www.deepcode.ai/app/gh/frenck/python-elgato/_/dashboard?utm_content=gh%2Ffrenck%2Fpython-elgato
 [frenck]: https://github.com/frenck
 [github-sponsors-shield]: https://frenck.dev/wp-content/uploads/2019/12/github_sponsor.png
 [github-sponsors]: https://github.com/sponsors/frenck
 [keepchangelog]: http://keepachangelog.com/en/1.0.0/
 [license-shield]: https://img.shields.io/github/license/frenck/python-elgato.svg
-[maintenance-shield]: https://img.shields.io/maintenance/yes/2022.svg
+[maintenance-shield]: https://img.shields.io/maintenance/yes/2023.svg
 [patreon-shield]: https://frenck.dev/wp-content/uploads/2019/12/patreon.png
 [patreon]: https://www.patreon.com/frenck
 [poetry-install]: https://python-poetry.org/docs/#installation

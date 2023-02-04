@@ -1,6 +1,5 @@
 """Asynchronous Python client for Elgato Lights."""
 from enum import IntEnum
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -10,7 +9,8 @@ class Info(BaseModel):
 
     This object holds information about the Elgato Light.
 
-    Attributes:
+    Attributes
+    ----------
         display_name: Configured display name of the Elgato Light.
         features: List of features this devices exposes.
         firmware_build_number: An integer with the build number of the firmware.
@@ -42,7 +42,8 @@ class Settings(BaseModel):
 
     This object holds information about the Elgato Light settings.
 
-    Attributes:
+    Attributes
+    ----------
         color_change_duration: Transition time of color changes in milliseconds.
         power_on_behavior: 1 = Restore last, 2 = Use defaults.
         power_on_brightness: The brightness used as default.
@@ -56,9 +57,9 @@ class Settings(BaseModel):
     color_change_duration: int = Field(..., alias="colorChangeDurationMs")
     power_on_behavior: PowerOnBehavior = Field(..., alias="powerOnBehavior")
     power_on_brightness: int = Field(..., alias="powerOnBrightness")
-    power_on_hue: Optional[float] = Field(None, alias="powerOnHue")
-    power_on_saturation: Optional[float] = Field(None, alias="powerOnSaturation")
-    power_on_temperature: Optional[int] = Field(None, alias="powerOnTemperature")
+    power_on_hue: float | None = Field(None, alias="powerOnHue")
+    power_on_saturation: float | None = Field(None, alias="powerOnSaturation")
+    power_on_temperature: int | None = Field(None, alias="powerOnTemperature")
     switch_off_duration: int = Field(..., alias="switchOffDurationMs")
     switch_on_duration: int = Field(..., alias="switchOnDurationMs")
 
@@ -68,7 +69,8 @@ class State(BaseModel):
 
     Represents a visible state of an Elgato Light.
 
-    Attributes:
+    Attributes
+    ----------
         on: A boolean indicating the if the light if on or off.
         brightness: An integer between 0 and 255, representing the brightness.
         hue:
@@ -78,6 +80,6 @@ class State(BaseModel):
 
     on: bool
     brightness: int
-    hue: Optional[float]
-    saturation: Optional[float]
-    temperature: Optional[int]
+    hue: float | None
+    saturation: float | None
+    temperature: int | None

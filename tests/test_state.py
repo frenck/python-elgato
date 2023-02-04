@@ -1,6 +1,8 @@
 """Tests for retrieving information from the Elgato Light device."""
-import aiohttp
+
 import pytest
+from aiohttp import ClientResponse, ClientSession
+from aresponses import Response, ResponsesMockServer
 
 from elgato import Elgato, ElgatoError, State
 
@@ -8,7 +10,7 @@ from . import load_fixture
 
 
 @pytest.mark.asyncio
-async def test_state_temperature(aresponses):
+async def test_state_temperature(aresponses: ResponsesMockServer) -> None:
     """Test getting Elgato Light state in temperature mode."""
     aresponses.add(
         "example.com:9123",
@@ -20,7 +22,7 @@ async def test_state_temperature(aresponses):
             text=load_fixture("state-temperature.json"),
         ),
     )
-    async with aiohttp.ClientSession() as session:
+    async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
         state: State = await elgato.state()
         assert state
@@ -32,7 +34,7 @@ async def test_state_temperature(aresponses):
 
 
 @pytest.mark.asyncio
-async def test_state_color(aresponses):
+async def test_state_color(aresponses: ResponsesMockServer) -> None:
     """Test getting Elgato Light state in color mode."""
     aresponses.add(
         "example.com:9123",
@@ -44,7 +46,7 @@ async def test_state_color(aresponses):
             text=load_fixture("state-color.json"),
         ),
     )
-    async with aiohttp.ClientSession() as session:
+    async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
         state: State = await elgato.state()
         assert state
@@ -56,10 +58,10 @@ async def test_state_color(aresponses):
 
 
 @pytest.mark.asyncio
-async def test_change_state_temperature(aresponses):
+async def test_change_state_temperature(aresponses: ResponsesMockServer) -> None:
     """Test changing Elgato Light State in temperature mode."""
 
-    async def response_handler(request):
+    async def response_handler(request: ClientResponse) -> Response:
         """Response handler for this test."""
         data = await request.json()
         assert data == {
@@ -74,16 +76,16 @@ async def test_change_state_temperature(aresponses):
 
     aresponses.add("example.com:9123", "/elgato/lights", "PUT", response_handler)
 
-    async with aiohttp.ClientSession() as session:
+    async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
         await elgato.light(on=True, brightness=100, temperature=200)
 
 
 @pytest.mark.asyncio
-async def test_change_state_color(aresponses):
+async def test_change_state_color(aresponses: ResponsesMockServer) -> None:
     """Test changing Elgato Light State in color mode."""
 
-    async def response_handler(request):
+    async def response_handler(request: ClientResponse) -> Response:
         """Response handler for this test."""
         data = await request.json()
         assert data == {
@@ -98,14 +100,14 @@ async def test_change_state_color(aresponses):
 
     aresponses.add("example.com:9123", "/elgato/lights", "PUT", response_handler)
 
-    async with aiohttp.ClientSession() as session:
+    async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
         await elgato.light(on=True, brightness=100, hue=10.1, saturation=20.2)
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "state,message",
+    ("state", "message"),
     [
         (
             {"hue": 10.1, "temperature": 10},
@@ -153,8 +155,8 @@ async def test_change_state_color(aresponses):
         ),
     ],
 )
-async def test_change_state_errors(state, message):
+async def test_change_state_errors(state: dict[str, int | float], message: str) -> None:
     """Test changing Elgato Light State with invalid values."""
     elgato = Elgato("example.com")
     with pytest.raises(ElgatoError, match=message):
-        await elgato.light(**state)
+        await elgato.light(**state)  # type: ignore[arg-type]

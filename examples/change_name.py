@@ -3,22 +3,20 @@
 
 import asyncio
 
-from elgato import Elgato, Info
+from elgato import Elgato
 
 
-async def main():
+async def main() -> None:
     """Show example of programmatically change the display name of a Elgato Light."""
     async with Elgato("elgato-key-light.local") as elgato:
         # Current name
-        info: Info = await elgato.info()
-        print(info.display_name)
+        await elgato.info()
 
         # Change the name
         await elgato.display_name("New name")
 
         # New name
-        info: Info = await elgato.info()
-        print(info.display_name)
+        await elgato.info()
 
 
 if __name__ == "__main__":
