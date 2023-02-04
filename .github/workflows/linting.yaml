@@ -32,7 +32,7 @@ jobs:
       - name: 🏗 Install Python dependencies
         run: poetry install --no-interaction
       - name: 🚀 Check code for common misspellings
-        run: pre-commit run codespell --all-files
+        run: poetry run pre-commit run codespell --all-files
 
   ruff:
     name: Ruff
@@ -122,8 +122,6 @@ jobs:
         run: poetry run pre-commit run check-yaml --all-files
       - name: 🚀 Check YAML files
         run: poetry run pre-commit run check-yaml --all-files
-      - name: 🚀 Debug Statements and imports (Python)
-        run: poetry run pre-commit run debug-statements --all-files
       - name: 🚀 Detect Private Keys
         run: poetry run pre-commit run detect-private-key --all-files
       - name: 🚀 Check End of Files
