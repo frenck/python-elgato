@@ -174,7 +174,7 @@ jobs:
         run: poetry run yamllint .
 
   prettier:
-    name: Prettier}
+    name: Prettier
     runs-on: ubuntu-latest
     steps:
       - name: ⤵️ Check out code from GitHub
