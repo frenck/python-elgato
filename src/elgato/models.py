@@ -4,6 +4,23 @@ from enum import IntEnum
 from pydantic import BaseModel, Field
 
 
+class Wifi(BaseModel):
+    """Object holding the Elgato device Wi-Fi information.
+
+    This object holds wireles information about the Elgato device.
+
+    Attributes
+    ----------
+        frequency: The frequency in MHz of the Wi-Fi network connected.
+        rssi: The signal strength in dBm of the Wi-Fi network connected.
+        ssid: The SSID of the Wi-Fi network the device is connected to.
+    """
+
+    frequency: int = Field(..., alias="frequencyMHz")
+    rssi: int
+    ssid: str
+
+
 class Info(BaseModel):
     """Object holding the Elgato Light device information.
 
@@ -21,12 +38,14 @@ class Info(BaseModel):
     """
 
     display_name: str = Field("Elgato Light", alias="displayName")
+    features: list[str] = Field(...)
     firmware_build_number: int = Field(..., alias="firmwareBuildNumber")
     firmware_version: str = Field(..., alias="firmwareVersion")
     hardware_board_type: int = Field(..., alias="hardwareBoardType")
+    mac_address: str | None = Field(None, alias="macAddress")
     product_name: str = Field(..., alias="productName")
     serial_number: str = Field(..., alias="serialNumber")
-    features: list[str] = Field(...)
+    wifi: Wifi | None = Field(None, alias="wifi-info")
 
 
 class PowerOnBehavior(IntEnum):

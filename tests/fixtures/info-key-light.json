@@ -1,9 +1,16 @@
 {
   "productName": "Elgato Key Light",
   "hardwareBoardType": 53,
-  "firmwareBuildNumber": 192,
+  "hardwareRevision": 1,
+  "macAddress": "AA:BB:CC:DD:EE:FF",
+  "firmwareBuildNumber": 218,
   "firmwareVersion": "1.0.3",
   "serialNumber": "CN11A1A00001",
   "displayName": "Frenck",
-  "features": ["lights"]
+  "features": ["lights"],
+  "wifi-info": {
+    "ssid": "Frenck-IoT",
+    "frequencyMHz": 2400,
+    "rssi": -48
+  }
 }
