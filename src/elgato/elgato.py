@@ -135,6 +135,10 @@ class Elgato:
         """Identify this Elgato Light device by making it blink."""
         await self._request("identify", method=METH_POST)
 
+    async def restart(self) -> None:
+        """Restart the Elgato Light device."""
+        await self._request("restart", method=METH_POST)
+
     async def display_name(self, name: str) -> None:
         """Change the display name of an Elgato Light device.
 
