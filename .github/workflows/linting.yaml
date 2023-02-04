@@ -126,8 +126,6 @@ jobs:
         run: poetry run pre-commit run detect-private-key --all-files
       - name: 🚀 Check End of Files
         run: poetry run pre-commit run end-of-file-fixer --all-files
-      - name: 🚀 Check UTF-8 byte order marker
-        run: poetry run pre-commit run fix-byte-order-marker --all-files
       - name: 🚀 Trim Trailing Whitespace
         run: poetry run pre-commit run trailing-whitespace --all-files
 
