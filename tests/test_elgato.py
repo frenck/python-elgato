@@ -11,7 +11,6 @@ from elgato import Elgato
 from elgato.exceptions import ElgatoConnectionError, ElgatoError
 
 
-@pytest.mark.asyncio
 async def test_json_request(aresponses: ResponsesMockServer) -> None:
     """Test JSON response is handled correctly."""
     aresponses.add(
@@ -31,7 +30,6 @@ async def test_json_request(aresponses: ResponsesMockServer) -> None:
         await elgato.close()
 
 
-@pytest.mark.asyncio
 async def test_internal_session(aresponses: ResponsesMockServer) -> None:
     """Test JSON response is handled correctly."""
     aresponses.add(
@@ -49,7 +47,6 @@ async def test_internal_session(aresponses: ResponsesMockServer) -> None:
         assert response["status"] == "ok"
 
 
-@pytest.mark.asyncio
 async def test_put_request(aresponses: ResponsesMockServer) -> None:
     """Test PUT requests are handled correctly."""
     aresponses.add(
@@ -68,7 +65,6 @@ async def test_put_request(aresponses: ResponsesMockServer) -> None:
         assert response["status"] == "ok"
 
 
-@pytest.mark.asyncio
 async def test_post_request(aresponses: ResponsesMockServer) -> None:
     """Test POST requests are handled correctly."""
     aresponses.add(
@@ -87,7 +83,6 @@ async def test_post_request(aresponses: ResponsesMockServer) -> None:
         assert response["status"] == "ok"
 
 
-@pytest.mark.asyncio
 async def test_request_port(aresponses: ResponsesMockServer) -> None:
     """Test the Elgato Light running on non-standard port."""
     aresponses.add(
@@ -107,7 +102,6 @@ async def test_request_port(aresponses: ResponsesMockServer) -> None:
         assert response["status"] == "ok"
 
 
-@pytest.mark.asyncio
 async def test_timeout(aresponses: ResponsesMockServer) -> None:
     """Test request timeout from the Elgato Light."""
     # Faking a timeout by sleeping
@@ -124,7 +118,6 @@ async def test_timeout(aresponses: ResponsesMockServer) -> None:
             assert await elgato._request("test")
 
 
-@pytest.mark.asyncio
 async def test_http_error400(aresponses: ResponsesMockServer) -> None:
     """Test HTTP 404 response handling."""
     aresponses.add(
@@ -140,7 +133,6 @@ async def test_http_error400(aresponses: ResponsesMockServer) -> None:
             assert await elgato._request("test")
 
 
-@pytest.mark.asyncio
 async def test_unexpected_response(aresponses: ResponsesMockServer) -> None:
     """Test unexpected response handling."""
     aresponses.add(
@@ -156,7 +148,6 @@ async def test_unexpected_response(aresponses: ResponsesMockServer) -> None:
             assert await elgato._request("test")
 
 
-@pytest.mark.asyncio
 async def test_light_on(aresponses: ResponsesMockServer) -> None:
     """Test controlling a Elgato Light."""
     # Handle to run asserts on request in
@@ -185,7 +176,6 @@ async def test_light_on(aresponses: ResponsesMockServer) -> None:
         await elgato.light(on=True, brightness=100, temperature=275)
 
 
-@pytest.mark.asyncio
 async def test_light_off(aresponses: ResponsesMockServer) -> None:
     """Test turning off an Elgato Light."""
     # Handle to run asserts on request in
@@ -214,7 +204,6 @@ async def test_light_off(aresponses: ResponsesMockServer) -> None:
         await elgato.light(on=False)
 
 
-@pytest.mark.asyncio
 async def test_light_no_on_off(aresponses: ResponsesMockServer) -> None:
     """Test controlling an Elgato Light without turning it on/off."""
     # Handle to run asserts on request in

@@ -1,6 +1,5 @@
 """Tests for retrieving information from the Elgato Light device."""
 
-import pytest
 from aiohttp import ClientSession
 from aresponses import ResponsesMockServer
 
@@ -9,7 +8,6 @@ from elgato import Elgato, Settings
 from . import load_fixture
 
 
-@pytest.mark.asyncio
 async def test_settings_keylight(aresponses: ResponsesMockServer) -> None:
     """Test getting Elgato Light device settings."""
     aresponses.add(
@@ -36,7 +34,6 @@ async def test_settings_keylight(aresponses: ResponsesMockServer) -> None:
         assert settings.switch_on_duration == 100
 
 
-@pytest.mark.asyncio
 async def test_settings_led_strip(aresponses: ResponsesMockServer) -> None:
     """Test getting Elgato Led Strip device settings."""
     aresponses.add(

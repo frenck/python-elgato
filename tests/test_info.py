@@ -1,6 +1,5 @@
 """Tests for retrieving information from the Elgato Key Light device."""
 
-import pytest
 from aiohttp import ClientResponse, ClientSession
 from aresponses import Response, ResponsesMockServer
 
@@ -9,7 +8,6 @@ from elgato import Elgato, Info
 from . import load_fixture
 
 
-@pytest.mark.asyncio
 async def test_info(aresponses: ResponsesMockServer) -> None:
     """Test getting Elgato Light device information."""
     aresponses.add(
@@ -35,7 +33,6 @@ async def test_info(aresponses: ResponsesMockServer) -> None:
         assert info.serial_number == "CN11A1A00001"
 
 
-@pytest.mark.asyncio
 async def test_change_display_name(aresponses: ResponsesMockServer) -> None:
     """Test changing the display name of an Elgato Light."""
 
@@ -61,7 +58,6 @@ async def test_change_display_name(aresponses: ResponsesMockServer) -> None:
         await elgato.display_name("OMG PUPPIES")
 
 
-@pytest.mark.asyncio
 async def test_missing_display_name(aresponses: ResponsesMockServer) -> None:
     """Test ensure we can handle a missing display name."""
     aresponses.add(
