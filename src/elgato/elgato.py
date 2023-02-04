@@ -8,7 +8,7 @@ from importlib import metadata
 from typing import Any, TypedDict, cast
 
 import async_timeout
-from aiohttp.client import ClientError, ClientResponseError, ClientSession
+from aiohttp.client import ClientError, ClientSession
 from aiohttp.hdrs import METH_GET, METH_POST, METH_PUT
 from yarl import URL
 
@@ -88,7 +88,6 @@ class Elgato:
             raise ElgatoConnectionError(msg) from exception
         except (
             ClientError,
-            ClientResponseError,
             socket.gaierror,
         ) as exception:
             msg = "Error occurred while communicating with Elgato Light device"
