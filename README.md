@@ -8,6 +8,7 @@
 
 [![Build Status][build-shield]][build]
 [![Code Coverage][codecov-shield]][codecov]
+[![Quality Gate Status][sonarcloud-shield]][sonarcloud]
 
 [![Sponsor Frenck via GitHub Sponsors][github-sponsors-shield]][github-sponsors]
 
@@ -167,3 +168,5 @@ SOFTWARE.
 [releases-shield]: https://img.shields.io/github/release/frenck/python-elgato.svg
 [releases]: https://github.com/frenck/python-elgato/releases
 [semver]: http://semver.org/spec/v2.0.0.html
+[sonarcloud-shield]: https://sonarcloud.io/api/project_badges/measure?project=frenck_python-elgato&metric=alert_status
+[sonarcloud]: https://sonarcloud.io/summary/new_code?id=frenck_python-elgato
