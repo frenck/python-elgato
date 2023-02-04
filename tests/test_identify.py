@@ -1,13 +1,11 @@
 """Tests for identifying the Elgato Light device."""
 
-import pytest
 from aiohttp import ClientSession
 from aresponses import ResponsesMockServer
 
 from elgato import Elgato
 
 
-@pytest.mark.asyncio
 async def test_identify(aresponses: ResponsesMockServer) -> None:
     """Test identifying the Elgato Light."""
     aresponses.add(

@@ -9,7 +9,6 @@ from elgato import Elgato, ElgatoError, State
 from . import load_fixture
 
 
-@pytest.mark.asyncio
 async def test_state_temperature(aresponses: ResponsesMockServer) -> None:
     """Test getting Elgato Light state in temperature mode."""
     aresponses.add(
@@ -33,7 +32,6 @@ async def test_state_temperature(aresponses: ResponsesMockServer) -> None:
         assert state.temperature == 297
 
 
-@pytest.mark.asyncio
 async def test_state_color(aresponses: ResponsesMockServer) -> None:
     """Test getting Elgato Light state in color mode."""
     aresponses.add(
@@ -57,7 +55,6 @@ async def test_state_color(aresponses: ResponsesMockServer) -> None:
         assert state.temperature is None
 
 
-@pytest.mark.asyncio
 async def test_change_state_temperature(aresponses: ResponsesMockServer) -> None:
     """Test changing Elgato Light State in temperature mode."""
 
@@ -81,7 +78,6 @@ async def test_change_state_temperature(aresponses: ResponsesMockServer) -> None
         await elgato.light(on=True, brightness=100, temperature=200)
 
 
-@pytest.mark.asyncio
 async def test_change_state_color(aresponses: ResponsesMockServer) -> None:
     """Test changing Elgato Light State in color mode."""
 
@@ -105,7 +101,6 @@ async def test_change_state_color(aresponses: ResponsesMockServer) -> None:
         await elgato.light(on=True, brightness=100, hue=10.1, saturation=20.2)
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     ("state", "message"),
     [
