@@ -3,20 +3,17 @@
 
 import asyncio
 
-from elgato import Elgato, Info, Settings, State
+from elgato import Elgato, State
 
 
-async def main():
+async def main() -> None:
     """Show example on controlling your Elgato Key device."""
     async with Elgato("elgato-key-light.local") as elgato:
-        info: Info = await elgato.info()
-        print(info)
+        await elgato.info()
 
-        settings: Settings = await elgato.settings()
-        print(settings)
+        await elgato.settings()
 
         state: State = await elgato.state()
-        print(state)
 
         # Toggle the light
         await elgato.light(on=(not state.on))

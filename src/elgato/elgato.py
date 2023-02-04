@@ -5,7 +5,7 @@ import asyncio
 import socket
 from dataclasses import dataclass
 from importlib import metadata
-from typing import Any, TypedDict
+from typing import Any, TypedDict, cast
 
 import async_timeout
 from aiohttp.client import ClientError, ClientResponseError, ClientSession
@@ -32,23 +32,26 @@ class Elgato:
         uri: str,
         *,
         method: str = METH_GET,
-        data: dict | None = None,
+        data: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Handle a request to a Elgato Light device.
 
         A generic method for sending/handling HTTP requests done against
         the Elgato Light API.
 
-        Args:
+        Args
+        ----
             uri: Request URI, without '/elgato/', for example, 'info'
             method: HTTP Method to use.
             data: Dictionary of data to send to the Elgato Light.
 
-        Returns:
+        Returns
+        -------
             A Python dictionary (JSON decoded) with the response from
             the Elgato Light API.
 
-        Raises:
+        Raises
+        ------
             ElgatoConnectionError: An error occurred while communicating with
                 the Elgato Light.
             ElgatoError: Received an unexpected response from the Elgato Light
@@ -56,7 +59,10 @@ class Elgato:
         """
         version = metadata.version(__package__)
         url = URL.build(
-            scheme="http", host=self.host, port=self.port, path="/elgato/"
+            scheme="http",
+            host=self.host,
+            port=self.port,
+            path="/elgato/",
         ).join(URL(uri))
 
         headers = {
@@ -78,32 +84,29 @@ class Elgato:
                 )
                 response.raise_for_status()
         except asyncio.TimeoutError as exception:
-            raise ElgatoConnectionError(
-                "Timeout occurred while connecting to Elgato Light device"
-            ) from exception
+            msg = "Timeout occurred while connecting to Elgato Light device"
+            raise ElgatoConnectionError(msg) from exception
         except (
             ClientError,
             ClientResponseError,
             socket.gaierror,
         ) as exception:
-            raise ElgatoConnectionError(
-                "Error occurred while communicating with Elgato Light device"
-            ) from exception
+            msg = "Error occurred while communicating with Elgato Light device"
+            raise ElgatoConnectionError(msg) from exception
 
         content_type = response.headers.get("Content-Type", "")
         if "application/json" not in content_type:
             text = await response.text()
-            raise ElgatoError(
-                "Unexpected response from the Elgato Light device",
-                {"Content-Type": content_type, "response": text},
-            )
+            msg = "Unexpected response from the Elgato Light device"
+            raise ElgatoError(msg, {"Content-Type": content_type, "response": text})
 
-        return await response.json()
+        return cast(dict[str, Any], await response.json())
 
     async def info(self) -> Info:
         """Get devices information from Elgato Light device.
 
-        Returns:
+        Returns
+        -------
             A Info object, with information about the Elgato Light device.
         """
         data = await self._request("accessory-info")
@@ -112,7 +115,8 @@ class Elgato:
     async def settings(self) -> Settings:
         """Get device settings from Elgato Light device.
 
-        Returns:
+        Returns
+        -------
             A Settings object, with information about the Elgato Light device.
         """
         data = await self._request("lights/settings")
@@ -121,7 +125,8 @@ class Elgato:
     async def state(self) -> State:
         """Get the current state of Elgato Light device.
 
-        Returns:
+        Returns
+        -------
             A State object, with the current Elgato Light state.
         """
         data = await self._request("lights")
@@ -135,10 +140,13 @@ class Elgato:
         """Change the display name of an Elgato Light device.
 
         Args:
-            name: The name to give the Elagto Light device.
+        ----
+            name: The name to give the Elgato Light device.
         """
         await self._request(
-            "/elgato/accessory-info", method=METH_PUT, data={"displayName": name}
+            "/elgato/accessory-info",
+            method=METH_PUT,
+            data={"displayName": name},
         )
 
     async def light(
@@ -159,11 +167,13 @@ class Elgato:
             saturation: The color saturation as a float from 0 to 100.
             temperature: The color temperature of the light, in mired.
 
-        Raises:
+        Raises
+        ------
             ElgatoError: The provided values are invalid.
         """
         if temperature and (hue or saturation):
-            raise ElgatoError("Cannot set temperature together with hue or saturation")
+            msg = "Cannot set temperature together with hue or saturation"
+            raise ElgatoError(msg)
 
         class LightState(TypedDict, total=False):  # lgtm [py/unused-local-variable]
             """Describe state dictionary that can be set on a light."""
@@ -181,29 +191,36 @@ class Elgato:
 
         if brightness is not None:
             if not 0 <= brightness <= 100:
-                raise ElgatoError("Brightness not between 0 and 100")
+                msg = "Brightness not between 0 and 100"
+                raise ElgatoError(msg)
             state["brightness"] = brightness
 
         if hue is not None:
             if not 0 <= hue <= 360:
-                raise ElgatoError("Hue not between 0 and 360")
+                msg = "Hue not between 0 and 360"
+                raise ElgatoError(msg)
             state["hue"] = hue
 
         if saturation is not None:
             if not 0 <= saturation <= 100:
-                raise ElgatoError("Saturation not between 0 and 100")
+                msg = "Saturation not between 0 and 100"
+                raise ElgatoError(msg)
             state["saturation"] = saturation
 
         if temperature is not None:
             if not 143 <= temperature <= 344:
-                raise ElgatoError("Color temperature out of range")
+                msg = "Color temperature out of range"
+                raise ElgatoError(msg)
             state["temperature"] = temperature
 
         if not state:
-            raise ElgatoError("No parameters to set, light not adjusted")
+            msg = "No parameters to set, light not adjusted"
+            raise ElgatoError(msg)
 
         await self._request(
-            "lights", method=METH_PUT, data={"numberOfLights": 1, "lights": [state]}
+            "lights",
+            method=METH_PUT,
+            data={"numberOfLights": 1, "lights": [state]},
         )
 
     async def close(self) -> None:
@@ -214,15 +231,17 @@ class Elgato:
     async def __aenter__(self) -> Elgato:
         """Async enter.
 
-        Returns:
+        Returns
+        -------
             The Elgato object.
         """
         return self
 
-    async def __aexit__(self, *_exc_info) -> None:
+    async def __aexit__(self, *_exc_info: Any) -> None:
         """Async exit.
 
         Args:
+        ----
             _exc_info: Exec type.
         """
         await self.close()
