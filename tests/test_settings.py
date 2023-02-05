@@ -4,7 +4,7 @@ import pytest
 from aiohttp import ClientResponse, ClientSession
 from aresponses import Response, ResponsesMockServer
 
-from elgato import Elgato, ElgatoNoBatteryError, Settings
+from elgato import Elgato, ElgatoNoBatteryError, PowerOnBehavior, Settings
 
 from . import load_fixture
 
@@ -261,3 +261,95 @@ async def test_energy_savings_no_changes(aresponses: ResponsesMockServer) -> Non
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
         await elgato.energy_saving()
+
+
+async def test_power_on_behavior_full(aresponses: ResponsesMockServer) -> None:
+    """Test changing power on behavior settings."""
+    aresponses.add(
+        "example.com:9123",
+        "/elgato/lights/settings",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text=load_fixture("settings-keylight.json"),
+        ),
+        repeat=1,
+    )
+
+    async def response_handler(request: ClientResponse) -> Response:
+        """Response handler for this test."""
+        data = await request.json()
+        assert data == {
+            "colorChangeDurationMs": 100,
+            "powerOnBehavior": 2,
+            "powerOnBrightness": 42,
+            "powerOnHue": 21.0,
+            "powerOnTemperature": 242,
+            "switchOffDurationMs": 300,
+            "switchOnDurationMs": 100,
+        }
+        return aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text="{}",
+        )
+
+    aresponses.add(
+        "example.com:9123",
+        "/elgato/lights/settings",
+        "PUT",
+        response_handler,
+    )
+
+    async with ClientSession() as session:
+        elgato = Elgato("example.com", session=session)
+        await elgato.power_on_behavior(
+            behavior=PowerOnBehavior.USE_DEFAULTS,
+            brightness=42,
+            hue=21.0,
+            temperature=242,
+        )
+
+
+async def test_power_on_behavior_no_changes(aresponses: ResponsesMockServer) -> None:
+    """Test changing power on behavior settings."""
+    aresponses.add(
+        "example.com:9123",
+        "/elgato/lights/settings",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text=load_fixture("settings-key-light-mini.json"),
+        ),
+        repeat=2,
+    )
+
+    async def response_handler(request: ClientResponse) -> Response:
+        """Response handler for this test."""
+        data = await request.json()
+        assert data == {
+            "colorChangeDurationMs": 100,
+            "powerOnBehavior": 1,
+            "powerOnBrightness": 20,
+            "powerOnTemperature": 230,
+            "switchOffDurationMs": 300,
+            "switchOnDurationMs": 100,
+        }
+        return aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text="{}",
+        )
+
+    aresponses.add(
+        "example.com:9123",
+        "/elgato/lights/settings",
+        "PUT",
+        response_handler,
+    )
+
+    async with ClientSession() as session:
+        elgato = Elgato("example.com", session=session)
+        await elgato.power_on_behavior()
