@@ -50,6 +50,7 @@ pytest-cov = "^4.0.0"
 yamllint = "^1.29.0"
 safety = "^2.3.5"
 codespell = "^2.2.2"
+covdefaults = "^2.2.2"
 
 [tool.black]
 target-version = ['py39']
@@ -57,11 +58,8 @@ target-version = ['py39']
 [tool.coverage.paths]
 source = ["src"]
 
-[tool.coverage.report]
-show_missing = true
-
 [tool.coverage.run]
-branch = true
+plugins = ["covdefaults"]
 source = ["elgato"]
 
 [tool.mypy]
