@@ -26,6 +26,7 @@ Known compatible and tested Elgato devices:
 
 - Elgato Key Light
 - Elgato Key Light Air
+- Elgato Key Light Mini
 - Elgato Light Strip
 
 ## Installation
@@ -56,8 +57,7 @@ async def main():
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    asyncio.run(main())
 ```
 
 ## Changelog & Releases

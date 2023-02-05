@@ -1,8 +1,8 @@
 """Tests for retrieving battery information from the Elgato Key Light device."""
 
 import pytest
-from aiohttp import ClientSession
-from aresponses import ResponsesMockServer
+from aiohttp import ClientResponse, ClientSession
+from aresponses import Response, ResponsesMockServer
 
 from elgato import BatteryInfo, BatteryStatus, Elgato, ElgatoNoBatteryError, PowerSource
 
@@ -66,3 +66,60 @@ async def test_battery_info(aresponses: ResponsesMockServer) -> None:
         assert battery.level == 78.57
         assert battery.power_source == PowerSource.MAINS
         assert battery.status == BatteryStatus.CHARGING
+
+
+async def test_battery_bypass_no_battery(aresponses: ResponsesMockServer) -> None:
+    """Test enabling battery bypass on a Elgato device without battery."""
+    aresponses.add(
+        "example.com:9123",
+        "/elgato/lights/settings",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text=load_fixture("settings-keylight.json"),
+        ),
+    )
+    async with ClientSession() as session:
+        elgato = Elgato("example.com", session=session)
+        assert await elgato.has_battery() is False
+        with pytest.raises(
+            ElgatoNoBatteryError,
+            match="The Elgato light does not have a battery.",
+        ):
+            await elgato.battery_bypass(on=True)
+
+
+async def test_battery_bypass(aresponses: ResponsesMockServer) -> None:
+    """Test changing battery bypass / studio mode."""
+    aresponses.add(
+        "example.com:9123",
+        "/elgato/lights/settings",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text=load_fixture("settings-key-light-mini.json"),
+        ),
+    )
+
+    async def response_handler(request: ClientResponse) -> Response:
+        """Response handler for this test."""
+        data = await request.json()
+        assert data == {"battery": {"bypass": 1}}
+        return aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text="{}",
+        )
+
+    aresponses.add(
+        "example.com:9123",
+        "/elgato/lights/settings",
+        "PUT",
+        response_handler,
+    )
+
+    async with ClientSession() as session:
+        elgato = Elgato("example.com", session=session)
+        await elgato.battery_bypass(on=True)
