@@ -5,15 +5,40 @@ import asyncio
 import socket
 from dataclasses import dataclass
 from importlib import metadata
-from typing import Any, TypedDict, cast
+from typing import TYPE_CHECKING, Any, Concatenate, ParamSpec, TypedDict, TypeVar, cast
 
 import async_timeout
 from aiohttp.client import ClientError, ClientSession
 from aiohttp.hdrs import METH_GET, METH_POST, METH_PUT
 from yarl import URL
 
-from .exceptions import ElgatoConnectionError, ElgatoError
-from .models import Info, Settings, State
+from .exceptions import ElgatoConnectionError, ElgatoError, ElgatoNoBatteryError
+from .models import BatteryInfo, Info, Settings, State
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Coroutine
+
+_ElgatoT = TypeVar("_ElgatoT", bound="Elgato")
+_R = TypeVar("_R")
+_P = ParamSpec("_P")
+
+
+def requires_battery(
+    func: Callable[Concatenate[_ElgatoT, _P], Coroutine[Any, Any, _R]],
+) -> Callable[Concatenate[_ElgatoT, _P], Coroutine[Any, Any, _R]]:
+    """Decorate Elgato calls that require a device with a battery installed.
+
+    A decorator that wraps and guards the passed in function, and checks if
+    the device has a battery installed and only than calls the function.
+    """
+
+    async def handler(self: _ElgatoT, *args: _P.args, **kwargs: _P.kwargs) -> _R:
+        """Handle calls to devices that require a battery."""
+        if await self.has_battery() is False:
+            raise ElgatoNoBatteryError
+        return await func(self, *args, **kwargs)
+
+    return handler
 
 
 @dataclass
@@ -26,6 +51,7 @@ class Elgato:
     session: ClientSession | None = None
 
     _close_session: bool = False
+    _has_battery: bool | None = None
 
     async def _request(
         self,
@@ -100,6 +126,30 @@ class Elgato:
             raise ElgatoError(msg, {"Content-Type": content_type, "response": text})
 
         return cast(dict[str, Any], await response.json())
+
+    async def has_battery(self) -> bool:
+        """Check if the Elgato Light device has a battery.
+
+        Returns
+        -------
+            A boolean indicating if the Elgato Light device has a battery.
+        """
+        if self._has_battery is None:
+            settings = await self.settings()
+            self._has_battery = settings.battery is not None
+        return self._has_battery
+
+    @requires_battery
+    async def battery(self) -> BatteryInfo:
+        """Get battery information from Elgato Light device.
+
+        Returns
+        -------
+            A BatteryInfo object, with information on the current battery state
+            of the Elgato light.
+        """
+        data = await self._request("battery-info")
+        return BatteryInfo.parse_obj(data)
 
     async def info(self) -> Info:
         """Get devices information from Elgato Light device.
