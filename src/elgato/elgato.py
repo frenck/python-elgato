@@ -13,7 +13,7 @@ from aiohttp.hdrs import METH_GET, METH_POST, METH_PUT
 from yarl import URL
 
 from .exceptions import ElgatoConnectionError, ElgatoError, ElgatoNoBatteryError
-from .models import BatteryInfo, BatterySettings, Info, Settings, State
+from .models import BatteryInfo, BatterySettings, Info, PowerOnBehavior, Settings, State
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
@@ -355,6 +355,43 @@ class Elgato:
             "lights",
             method=METH_PUT,
             data={"numberOfLights": 1, "lights": [state]},
+        )
+
+    async def power_on_behavior(
+        self,
+        *,
+        behavior: PowerOnBehavior | None = None,
+        brightness: int | None = None,
+        hue: float | None = None,
+        temperature: int | None = None,
+    ) -> None:
+        """Change the power on behavior of the Elgato Light device.
+
+        Args:
+        ----
+            behavior: The power on behavior to set.
+            brightness: The power on brightness of the light, between 0 and 255.
+            hue: The power on hue range as a float from 0 to 360 degrees.
+            temperature: The power on color temperature of the light, in mired.
+        """
+        current_settings = await self.settings()
+        if behavior is not None:
+            current_settings.power_on_behavior = behavior
+        if brightness is not None:
+            current_settings.power_on_brightness = brightness
+        if hue is not None:
+            current_settings.power_on_hue = hue
+        if temperature is not None:
+            current_settings.power_on_temperature = temperature
+
+        # Unset battery if present, needs special handling
+        if current_settings.battery:
+            current_settings.battery = None
+
+        await self._request(
+            "/elgato/lights/settings",
+            method=METH_PUT,
+            data=current_settings.dict(by_alias=True, exclude_none=True),
         )
 
     async def close(self) -> None:
