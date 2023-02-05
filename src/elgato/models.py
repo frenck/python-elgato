@@ -4,6 +4,69 @@ from enum import IntEnum
 from pydantic import BaseModel, Field
 
 
+class EnergySavingAdjustBrightnessSettings(BaseModel):
+    """Object holding the Elgato Light battery energy saving settings for brightness.
+
+    This object holds information about the Elgato Light energy saving settings
+    for saving battery when using the light regarding brightness limits.
+
+    Only applies to Elgato devices with a battery of course,
+    like the Key Light Mini.
+
+    Attributes
+    ----------
+        brightness: Adjusted brightness when energy saving is active.
+        enabled: boolean
+    """
+
+    brightness: int
+    enabled: bool = Field(..., alias="enable")
+
+
+class EnergySavingSettings(BaseModel):
+    """Object holding the Elgato Light battery energy saving settings.
+
+    This object holds information about the Elgato Light energy saving settings
+    for saving battery when using the light.
+
+    Only applies to Elgato devices with a battery of course,
+    like the Key Light Mini.
+
+    Attributes
+    ----------
+        adjust_brightness: Adjust brightness when energy saving is active.
+        disable_wifi: Disable Wi-Fi when energy saving is active.
+        enabled: boolean
+        minimum_battery_level: Use energy saving when battery level is below this value.
+    """
+
+    adjust_brightness: EnergySavingAdjustBrightnessSettings = Field(
+        ...,
+        alias="adjustBrightness",
+    )
+    disable_wifi: bool = Field(..., alias="disableWifi")
+    enabled: bool = Field(..., alias="enable")
+    minimum_battery_level: int = Field(..., alias="minimumBatteryLevel")
+
+
+class BatterySettings(BaseModel):
+    """Object holding the Elgato Light battery information.
+
+    This object holds information about the Elgato Light battery.
+
+    Only applies to Elgato devices with a battery of course,
+    like the Key Light Mini.
+
+    Attributes
+    ----------
+        energy_saving: Energy saving settings.
+        bypass: If the battery is bypassed (studio mode).
+    """
+
+    energy_saving: EnergySavingSettings = Field(..., alias="energySaving")
+    bypass: bool
+
+
 class Wifi(BaseModel):
     """Object holding the Elgato device Wi-Fi information.
 
@@ -19,6 +82,73 @@ class Wifi(BaseModel):
     frequency: int = Field(..., alias="frequencyMHz")
     rssi: int
     ssid: str
+
+
+class PowerSource(IntEnum):
+    """Enum for the power source of the Elgato Light."""
+
+    UNKNOWN = 0
+    MAINS = 1
+    BATTERY = 2
+
+
+class BatteryStatus(IntEnum):
+    """Enum for the battery status of the Elgato Light.
+
+    Value "1" seems to be unused. I could not get it to show up, no
+    matter if the device was charging or not, in saving mode or even bypass.
+    """
+
+    DRAINING = 0
+    CHARGING = 2
+    CHARGED = 3
+
+
+class BatteryInfo(BaseModel):
+    """Object holding the Elgato Light device information.
+
+    This object holds information about the Elgato Light.
+
+    Attributes
+    ----------
+        charge_current: The charge current in A.
+        charge_power: The charge power in W.
+        charge_voltage: The charge voltage in V.
+        input_charge_current: The charge current in mA.
+        input_charge_voltage: The charge voltage in mV.
+        input_charge_voltage: The charge voltage in mV.
+        level: The battery level of the device in %.
+        power_source: The power source of the device.
+        status: The battery status.
+        voltage: The current battery voltage in mV.
+    """
+
+    power_source: PowerSource = Field(..., alias="powerSource")
+    level: float
+    status: BatteryStatus
+    voltage: int = Field(..., alias="currentBatteryVoltage")
+    input_charge_voltage: int = Field(..., alias="inputChargeVoltage")
+    input_charge_current: int = Field(..., alias="inputChargeCurrent")
+
+    @property
+    def input_charge_power(self) -> int:
+        """Return the input charge power in mW."""
+        return round(self.input_charge_voltage * self.input_charge_current / 1_000)
+
+    @property
+    def charge_current(self) -> float:
+        """Return the charge current in A."""
+        return round(self.input_charge_current / 1_000, 2)
+
+    @property
+    def charge_power(self) -> float:
+        """Return the charge power in W."""
+        return round(self.input_charge_power / 1_000, 2)
+
+    @property
+    def charge_voltage(self) -> float:
+        """Return the charge voltage in V."""
+        return round(self.input_charge_voltage / 1_000, 2)
 
 
 class Info(BaseModel):
@@ -63,6 +193,7 @@ class Settings(BaseModel):
 
     Attributes
     ----------
+        battery: Battery settings, if the device has a battery.
         color_change_duration: Transition time of color changes in milliseconds.
         power_on_behavior: 1 = Restore last, 2 = Use defaults.
         power_on_brightness: The brightness used as default.
@@ -73,6 +204,7 @@ class Settings(BaseModel):
         switch_on_duration: Turn on transition time in milliseconds.
     """
 
+    battery: BatterySettings | None = None
     color_change_duration: int = Field(..., alias="colorChangeDurationMs")
     power_on_behavior: PowerOnBehavior = Field(..., alias="powerOnBehavior")
     power_on_brightness: int = Field(..., alias="powerOnBrightness")
