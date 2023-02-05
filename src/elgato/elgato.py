@@ -13,7 +13,7 @@ from aiohttp.hdrs import METH_GET, METH_POST, METH_PUT
 from yarl import URL
 
 from .exceptions import ElgatoConnectionError, ElgatoError, ElgatoNoBatteryError
-from .models import BatteryInfo, Info, Settings, State
+from .models import BatteryInfo, BatterySettings, Info, Settings, State
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
@@ -151,6 +151,87 @@ class Elgato:
         data = await self._request("battery-info")
         return BatteryInfo.parse_obj(data)
 
+    @requires_battery
+    async def battery_bypass(self, *, on: bool) -> None:
+        """Change the bypass mode of the Elgato Light device.
+
+        In the app this is also called "Studio mode". When the bypass mode is
+        the battery isn't used and would only work when the device is plugged
+        into mains.
+
+        There is an odd bug in current versions of the Elgato Light Mini
+        firmware, that turns the light on when the bypass mode is turned off;
+        the device will still think it is turned off, but the light will be on.
+
+        Args:
+        ----
+            on: A boolean, true to turn on bypass, false otherwise.
+        """
+        await self._request(
+            "/elgato/lights/settings",
+            method=METH_PUT,
+            data={"battery": {"bypass": int(on)}},
+        )
+
+    async def battery_settings(self) -> BatterySettings:
+        """Get device battery settings from Elgato Light device.
+
+        Guarded version of `settings().battery`.
+
+        Returns
+        -------
+            A Battery settings object, with information about the Elgato Light device.
+        """
+        settings = await self.settings()
+        if settings.battery is None:
+            raise ElgatoNoBatteryError
+        return settings.battery
+
+    @requires_battery
+    async def energy_saving(
+        self,
+        *,
+        adjust_brightness: bool | None = None,
+        brightness: int | None = None,
+        disable_wifi: bool | None = None,
+        minimum_battery_level: int | None = None,
+        on: bool | None = None,
+    ) -> None:
+        """Change the energy saving mode of the Elgato Light device.
+
+        Args:
+        ----
+            adjust_brightness: Adjust the brightness of the light when it drops
+                below the minimum battery level threshold. True to turn it on,
+                false otherwise.
+            brightness: The brightness to set the light to when energy savings
+                kicks in. This is only used when adjust_brightness is True.
+            disable_wifi: Disable the WiFi of the Elgato Light device when
+                energy savings kicks in. True to turn it on, false otherwise.
+            minimum_battery_level: The minimum battery level threshold to
+                trigger energy savings.
+            on: A boolean, true to turn on energy saving, false otherwise.
+        """
+        current_settings = await self.battery_settings()
+        data = current_settings.energy_saving.dict(by_alias=True)
+
+        if on is not None:
+            data["enable"] = int(on)
+        if minimum_battery_level is not None:
+            data["minimumBatteryLevel"] = minimum_battery_level
+        if disable_wifi is not None:
+            data["disableWifi"] = int(disable_wifi)
+        if adjust_brightness is not None:
+            data["adjustBrightness"]["enable"] = int(adjust_brightness)
+        if brightness is not None:
+            data["adjustBrightness"]["brightness"] = brightness
+
+        await self._request(
+            "/elgato/lights/settings",
+            method=METH_PUT,
+            data={"battery": {"energySaving": data}},
+        )
+
     async def info(self) -> Info:
         """Get devices information from Elgato Light device.
 
@@ -228,7 +309,7 @@ class Elgato:
             msg = "Cannot set temperature together with hue or saturation"
             raise ElgatoError(msg)
 
-        class LightState(TypedDict, total=False):  # lgtm [py/unused-local-variable]
+        class LightState(TypedDict, total=False):
             """Describe state dictionary that can be set on a light."""
 
             brightness: int

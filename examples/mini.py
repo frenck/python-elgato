@@ -11,8 +11,8 @@ async def main() -> None:
     async with Elgato("10.10.11.172") as elgato:
         # General device information
         print(await elgato.info())
-        print(await elgato.settings())
-        print(state := await elgato.state())
+        print(settings := await elgato.settings())
+        print(await elgato.state())
 
         # General battery information
         battery = await elgato.battery()
@@ -21,8 +21,19 @@ async def main() -> None:
         print(f"Voltage: {battery.charge_voltage}V")
         print(f"Current: {battery.charge_current}A")
 
-        # Toggle the light
-        await elgato.light(on=(not state.on))
+        # Toggle the studio mode
+        if settings.battery is None:
+            raise RuntimeError
+        await elgato.battery_bypass(on=(not settings.battery.bypass))
+
+        # Adjust energy saving settings
+        await elgato.energy_saving(
+            on=True,
+            brightness=66,
+            disable_wifi=True,
+            minimum_battery_level=16,
+            adjust_brightness=True,
+        )
 
 
 if __name__ == "__main__":
