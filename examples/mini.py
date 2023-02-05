@@ -19,7 +19,7 @@ async def main() -> None:
         print(f"Level: {battery.level} %")
         print(f"Power: {battery.charge_power}W")
         print(f"Voltage: {battery.charge_voltage}V")
-        print(f"Power: {battery.charge_current}A")
+        print(f"Current: {battery.charge_current}A")
 
         # Toggle the light
         await elgato.light(on=(not state.on))
