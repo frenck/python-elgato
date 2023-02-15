@@ -12,7 +12,7 @@ env:
 
 jobs:
   codespell:
-    name: yamllint
+    name: codespell
     runs-on: ubuntu-latest
     steps:
       - name: ⤵️ Check out code from GitHub
