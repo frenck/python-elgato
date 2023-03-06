@@ -65,18 +65,18 @@ class Elgato:
         A generic method for sending/handling HTTP requests done against
         the Elgato Light API.
 
-        Args
+        Args:
         ----
             uri: Request URI, without '/elgato/', for example, 'info'
             method: HTTP Method to use.
             data: Dictionary of data to send to the Elgato Light.
 
-        Returns
+        Returns:
         -------
             A Python dictionary (JSON decoded) with the response from
             the Elgato Light API.
 
-        Raises
+        Raises:
         ------
             ElgatoConnectionError: An error occurred while communicating with
                 the Elgato Light.
@@ -295,13 +295,14 @@ class Elgato:
         """Change state of an Elgato Light device.
 
         Args:
+        ----
             on: A boolean, true to turn the light on, false otherwise.
             brightness: The brightness of the light, between 0 and 255.
             hue: The hue range as a float from 0 to 360 degrees.
             saturation: The color saturation as a float from 0 to 100.
             temperature: The color temperature of the light, in mired.
 
-        Raises
+        Raises:
         ------
             ElgatoError: The provided values are invalid.
         """
