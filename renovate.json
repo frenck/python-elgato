@@ -28,9 +28,10 @@
       "automerge": true
     },
     {
-      "matchManagers": ["npm"],
+      "matchManagers": ["npm", "nvm"],
       "addLabels": ["javascript"],
       "stabilityDays": 3,
+      "rangeStrategy": "pin",
       "automerge": true
     },
     {
