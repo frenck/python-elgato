@@ -24,6 +24,7 @@
     },
     {
       "matchManagers": ["npm"],
+      "addLabels": ["javascript"],
       "stabilityDays": 3,
       "automerge": true
     },
@@ -34,8 +35,9 @@
     },
     {
       "matchManagers": ["github-actions"],
-      "addLabels": ["github-actions"],
+      "addLabels": ["github_actions"],
       "stabilityDays": 3,
+      "rangeStrategy": "pin",
       "pinDigests": true
     },
     {
