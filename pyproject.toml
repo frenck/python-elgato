@@ -37,7 +37,7 @@ Changelog = "https://github.com/frenck/python-elgato/releases"
 [tool.poetry.group.dev.dependencies]
 ruff = ">=0.0.241,<0.0.258"
 aresponses = "^2.1.6"
-black = "^22.12"
+black = "^23.0.0"
 blacken-docs = "^1.13.0"
 coverage = {version = "^7.1", extras = ["toml"]}
 mypy = ">=0.991,<1.2"
