@@ -19,6 +19,11 @@
     {
       "matchManagers": ["poetry"],
       "matchDepTypes": ["dev"],
+      "rangeStrategy": "pin"
+    },
+    {
+      "matchManagers": ["poetry"],
+      "matchDepTypes": ["dev"],
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": true
     },
