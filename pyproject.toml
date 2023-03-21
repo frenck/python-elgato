@@ -35,7 +35,7 @@ pydantic = "^1.8.0"
 Changelog = "https://github.com/frenck/python-elgato/releases"
 
 [tool.poetry.group.dev.dependencies]
-ruff = ">=0.0.241,<0.0.255"
+ruff = ">=0.0.241,<0.0.258"
 aresponses = "^2.1.6"
 black = "^22.12"
 blacken-docs = "^1.13.0"
