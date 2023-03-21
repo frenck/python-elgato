@@ -54,7 +54,7 @@ async def test_info_key_light_air(aresponses: ResponsesMockServer) -> None:
         elgato = Elgato("example.com", session=session)
         info: Info = await elgato.info()
         assert info
-        assert info.display_name == ""
+        assert not info.display_name
         assert info.features == ["lights"]
         assert info.firmware_build_number == 195
         assert info.firmware_version == "1.0.3"
