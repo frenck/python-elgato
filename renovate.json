@@ -14,14 +14,22 @@
   "packageRules": [
     {
       "matchManagers": ["poetry"],
-      "addLabels": ["python"],
-      "stabilityDays": 3
+      "addLabels": ["python"]
     },
     {
       "matchManagers": ["poetry"],
       "matchDepTypes": ["dev"],
       "matchUpdateTypes": ["minor", "patch"],
-      "stabilityDays": 1,
+      "automerge": true
+    },
+    {
+      "matchManagers": ["npm"],
+      "stabilityDays": 3,
+      "automerge": true
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["minor", "patch"],
       "automerge": true
     },
     {
