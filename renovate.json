@@ -1,0 +1,47 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "schedule": [
+    "before 2am"
+  ],
+  "rebaseWhen": "behind-base-branch",
+  "dependencyDashboard": true,
+  "labels": ["dependencies"],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true
+  },
+  "commitMessagePrefix": "⬆️",
+  "packageRules": [
+    {
+      "matchManagers": ["poetry"],
+      "addLabels": ["python"]
+    },
+    {
+      "matchManagers": ["poetry"],
+      "matchDepTypes": ["dev"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
+    },
+    {
+      "matchManagers": ["npm"],
+      "stabilityDays": 3,
+      "automerge": true
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "addLabels": ["github-actions"],
+      "stabilityDays": 3,
+      "pinDigests": true
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
+    }
+  ]
+}
