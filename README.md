@@ -9,6 +9,7 @@
 [![Build Status][build-shield]][build]
 [![Code Coverage][codecov-shield]][codecov]
 [![Quality Gate Status][sonarcloud-shield]][sonarcloud]
+[![Open in Dev Containers][devcontainer-shield]][devcontainer]
 
 [![Sponsor Frenck via GitHub Sponsors][github-sponsors-shield]][github-sponsors]
 
@@ -151,6 +152,8 @@ SOFTWARE.
 [codecov-shield]: https://codecov.io/gh/frenck/python-elgato/branch/master/graph/badge.svg
 [codecov]: https://codecov.io/gh/frenck/python-elgato
 [contributors]: https://github.com/frenck/python-elgato/graphs/contributors
+[devcontainer-shield]: https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode
+[devcontainer]: https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/frenck/python-elgato
 [frenck]: https://github.com/frenck
 [github-sponsors-shield]: https://frenck.dev/wp-content/uploads/2019/12/github_sponsor.png
 [github-sponsors]: https://github.com/sponsors/frenck
