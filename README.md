@@ -87,6 +87,11 @@ Thank you for being involved! :heart_eyes:
 
 ## Setting up development environment
 
+The easiest way to start, is by opening a CodeSpace here on GitHub, or by using
+the [Dev Container][devcontainer] feature of Visual Studio Code.
+
+[![Open in Dev Containers][devcontainer-shield]][devcontainer]
+
 This Python project is fully managed using the [Poetry][poetry] dependency manager. But also relies on the use of NodeJS for certain checks during development.
 
 You need at least:
