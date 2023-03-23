@@ -27,8 +27,11 @@
     {
       "matchManagers": ["npm", "nvm"],
       "addLabels": ["javascript"],
+      "rangeStrategy": "pin"
+    },
+    {
+      "matchManagers": ["npm", "nvm"],
       "matchUpdateTypes": ["minor", "patch"],
-      "rangeStrategy": "pin",
       "automerge": true
     },
     {
