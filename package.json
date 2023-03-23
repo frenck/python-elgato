@@ -4,7 +4,6 @@
   "private": true,
   "description": "Asynchronous Python client for Elgato Lights",
   "scripts": {
-    "pyright": "pyright",
     "prettier": "prettier --write **/*.{json,js,md,yml,yaml}"
   },
   "author": "Franck Nijhof <opensource@frenck.dev>",
