@@ -24,7 +24,7 @@ jobs:
         run: pipx install poetry
       - name: 🏗 Set up Python ${{ matrix.python }}
         id: python
-        uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4
+        uses: actions/setup-python@v4.5.0
         with:
           python-version: ${{ matrix.python }}
           cache: "poetry"
@@ -37,7 +37,7 @@ jobs:
       - name: 🚀 Run pytest
         run: poetry run pytest --cov elgato tests
       - name: ⬆️ Upload coverage artifact
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: coverage-${{ matrix.python }}
           path: .coverage
@@ -73,7 +73,7 @@ jobs:
       - name: 🚀 Upload coverage report
         uses: codecov/codecov-action@v3.1.1
       - name: SonarCloud Scan
-        if: github.repository_owner == 'frenck'
+        if: github.event.pull_request.head.repo.fork == false
         uses: SonarSource/sonarcloud-github-action@v1.9
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
