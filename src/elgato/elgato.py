@@ -188,7 +188,7 @@ class Elgato:
         return settings.battery
 
     @requires_battery
-    async def energy_saving(
+    async def energy_saving(  # noqa: PLR0913
         self,
         *,
         adjust_brightness: bool | None = None,
@@ -283,7 +283,7 @@ class Elgato:
             data={"displayName": name},
         )
 
-    async def light(
+    async def light(  # noqa: PLR0913
         self,
         *,
         on: bool | None = None,
