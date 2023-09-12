@@ -5,7 +5,6 @@ classifiers = [
   "Framework :: AsyncIO",
   "Intended Audience :: Developers",
   "Natural Language :: English",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3",
   "Topic :: Software Development :: Libraries :: Python Modules",
@@ -27,7 +26,7 @@ version = "0.0.0"
 [tool.poetry.dependencies]
 aiohttp = ">=3.0.0"
 pydantic = "^1.8.0"
-python = "^3.10"
+python = "^3.11"
 yarl = ">=1.6.0"
 
 [tool.poetry.urls]
@@ -64,7 +63,7 @@ show_missing = true
 # free to run mypy on Windows, Linux, or macOS and get consistent
 # results.
 platform = "linux"
-python_version = "3.10"
+python_version = "3.11"
 
 # show error messages from unrelated files
 follow_imports = "normal"
@@ -133,6 +132,7 @@ addopts = "--cov"
 asyncio_mode = "auto"
 
 [tool.ruff]
+target-version = "py311"
 ignore = [
   "ANN101", # Self... explanatory
   "ANN401", # Opinioated warning on disallowing dynamically typed expressions

@@ -5,7 +5,16 @@ import asyncio
 import socket
 from dataclasses import dataclass
 from importlib import metadata
-from typing import TYPE_CHECKING, Any, Concatenate, ParamSpec, TypedDict, TypeVar, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Concatenate,
+    ParamSpec,
+    Self,
+    TypedDict,
+    TypeVar,
+    cast,
+)
 
 import async_timeout
 from aiohttp.client import ClientError, ClientSession
@@ -400,7 +409,7 @@ class Elgato:
         if self.session and self._close_session:
             await self.session.close()
 
-    async def __aenter__(self) -> Elgato:
+    async def __aenter__(self) -> Self:
         """Async enter.
 
         Returns
@@ -409,7 +418,7 @@ class Elgato:
         """
         return self
 
-    async def __aexit__(self, *_exc_info: Any) -> None:
+    async def __aexit__(self, *_exc_info: object) -> None:
         """Async exit.
 
         Args:
