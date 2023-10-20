@@ -3,7 +3,13 @@ from __future__ import annotations
 
 from enum import IntEnum
 
-from pydantic import BaseModel, Field
+try:
+    from pydantic.v1 import BaseModel, Field
+except ImportError:  # pragma: no cover
+    from pydantic import (  # type: ignore[assignment] # pragma: no cover
+        BaseModel,
+        Field,
+    )
 
 
 class EnergySavingAdjustBrightnessSettings(BaseModel):
