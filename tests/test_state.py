@@ -1,4 +1,5 @@
 """Tests for retrieving information from the Elgato Light device."""
+from __future__ import annotations
 
 import pytest
 from aiohttp import ClientResponse, ClientSession

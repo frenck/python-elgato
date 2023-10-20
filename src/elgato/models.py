@@ -1,4 +1,6 @@
 """Asynchronous Python client for Elgato Lights."""
+from __future__ import annotations
+
 from enum import IntEnum
 
 from pydantic import BaseModel, Field
