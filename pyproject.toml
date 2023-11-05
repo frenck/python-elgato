@@ -36,8 +36,6 @@ Changelog = "https://github.com/frenck/python-elgato/releases"
 
 [tool.poetry.group.dev.dependencies]
 aresponses = "2.1.6"
-black = "23.10.1"
-blacken-docs = "1.16.0"
 codespell = "2.2.6"
 covdefaults = "2.3.0"
 coverage = {version = "7.3.2", extras = ["toml"]}
