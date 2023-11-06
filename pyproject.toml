@@ -26,7 +26,8 @@ version = "0.0.0"
 
 [tool.poetry.dependencies]
 aiohttp = ">=3.0.0"
-pydantic = ">1.8.0"
+mashumaro = ">=3.10"
+orjson = ">=3.9.8"
 python = "^3.11"
 yarl = ">=1.6.0"
 
@@ -151,6 +152,9 @@ mark-parentheses = false
 
 [tool.ruff.isort]
 known-first-party = ["elgato"]
+
+[tool.ruff.lint.flake8-type-checking]
+runtime-evaluated-base-classes = ["mashumaro.mixins.orjson.DataClassORJSONMixin"]
 
 [tool.ruff.mccabe]
 max-complexity = 25

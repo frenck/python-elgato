@@ -1,17 +1,40 @@
 """Asynchronous Python client for Elgato Lights."""
 from __future__ import annotations
 
+from dataclasses import dataclass, field
 from enum import IntEnum
 
-try:
-    from pydantic.v1 import BaseModel, Field
-except ImportError:  # pragma: no cover
-    from pydantic import (  # type: ignore[assignment] # pragma: no cover
-        BaseModel,
-        Field,
-    )
+from mashumaro import field_options
+from mashumaro.config import BaseConfig
+from mashumaro.mixins.orjson import DataClassORJSONMixin
+from mashumaro.types import SerializationStrategy
 
 
+class IntegerIsBoolean(SerializationStrategy):
+    """Boolean serialization strategy for integers."""
+
+    def serialize(self, value: bool) -> int:  # noqa: FBT001
+        """Serialize a boolean to an integer."""
+        return int(value)
+
+    def deserialize(self, value: int) -> bool:
+        """Deserialize an integer to a boolean."""
+        return bool(value)
+
+
+class BaseModel(DataClassORJSONMixin):
+    """Base model for all Elgato models."""
+
+    # pylint: disable-next=too-few-public-methods
+    class Config(BaseConfig):
+        """Mashumaro configuration."""
+
+        omit_none = True
+        serialization_strategy = {bool: IntegerIsBoolean()}  # noqa: RUF012
+        serialize_by_alias = True
+
+
+@dataclass
 class EnergySavingAdjustBrightnessSettings(BaseModel):
     """Object holding the Elgato Light battery energy saving settings for brightness.
 
@@ -28,9 +51,10 @@ class EnergySavingAdjustBrightnessSettings(BaseModel):
     """
 
     brightness: int
-    enabled: bool = Field(..., alias="enable")
+    enabled: bool = field(metadata=field_options(alias="enable"))
 
 
+@dataclass
 class EnergySavingSettings(BaseModel):
     """Object holding the Elgato Light battery energy saving settings.
 
@@ -48,15 +72,17 @@ class EnergySavingSettings(BaseModel):
         minimum_battery_level: Use energy saving when battery level is below this value.
     """
 
-    adjust_brightness: EnergySavingAdjustBrightnessSettings = Field(
-        ...,
-        alias="adjustBrightness",
+    adjust_brightness: EnergySavingAdjustBrightnessSettings = field(
+        metadata=field_options(alias="adjustBrightness")
     )
-    disable_wifi: bool = Field(..., alias="disableWifi")
-    enabled: bool = Field(..., alias="enable")
-    minimum_battery_level: int = Field(..., alias="minimumBatteryLevel")
+    disable_wifi: bool = field(metadata=field_options(alias="disableWifi"))
+    enabled: bool = field(metadata=field_options(alias="enable"))
+    minimum_battery_level: int = field(
+        metadata=field_options(alias="minimumBatteryLevel")
+    )
 
 
+@dataclass
 class BatterySettings(BaseModel):
     """Object holding the Elgato Light battery information.
 
@@ -71,10 +97,13 @@ class BatterySettings(BaseModel):
         bypass: If the battery is bypassed (studio mode).
     """
 
-    energy_saving: EnergySavingSettings = Field(..., alias="energySaving")
+    energy_saving: EnergySavingSettings = field(
+        metadata=field_options(alias="energySaving")
+    )
     bypass: bool
 
 
+@dataclass
 class Wifi(BaseModel):
     """Object holding the Elgato device Wi-Fi information.
 
@@ -87,7 +116,7 @@ class Wifi(BaseModel):
         ssid: The SSID of the Wi-Fi network the device is connected to.
     """
 
-    frequency: int = Field(..., alias="frequencyMHz")
+    frequency: int = field(metadata=field_options(alias="frequencyMHz"))
     rssi: int
     ssid: str
 
@@ -112,6 +141,7 @@ class BatteryStatus(IntEnum):
     CHARGED = 3
 
 
+@dataclass
 class BatteryInfo(BaseModel):
     """Object holding the Elgato Light device information.
 
@@ -131,12 +161,16 @@ class BatteryInfo(BaseModel):
         voltage: The current battery voltage in mV.
     """
 
-    power_source: PowerSource = Field(..., alias="powerSource")
+    power_source: PowerSource = field(metadata=field_options(alias="powerSource"))
     level: float
     status: BatteryStatus
-    voltage: int = Field(..., alias="currentBatteryVoltage")
-    input_charge_voltage: int = Field(..., alias="inputChargeVoltage")
-    input_charge_current: int = Field(..., alias="inputChargeCurrent")
+    voltage: int = field(metadata=field_options(alias="currentBatteryVoltage"))
+    input_charge_voltage: int = field(
+        metadata=field_options(alias="inputChargeVoltage")
+    )
+    input_charge_current: int = field(
+        metadata=field_options(alias="inputChargeCurrent")
+    )
 
     @property
     def input_charge_power(self) -> int:
@@ -159,6 +193,8 @@ class BatteryInfo(BaseModel):
         return round(self.input_charge_voltage / 1_000, 2)
 
 
+@dataclass
+# pylint: disable-next=too-many-instance-attributes
 class Info(BaseModel):
     """Object holding the Elgato Light device information.
 
@@ -175,15 +211,21 @@ class Info(BaseModel):
         serial_number: Serial number of the Elgato Light.
     """
 
-    display_name: str = Field("Elgato Light", alias="displayName")
-    features: list[str] = Field(...)
-    firmware_build_number: int = Field(..., alias="firmwareBuildNumber")
-    firmware_version: str = Field(..., alias="firmwareVersion")
-    hardware_board_type: int = Field(..., alias="hardwareBoardType")
-    mac_address: str | None = Field(None, alias="macAddress")
-    product_name: str = Field(..., alias="productName")
-    serial_number: str = Field(..., alias="serialNumber")
-    wifi: Wifi | None = Field(None, alias="wifi-info")
+    features: list[str]
+    firmware_build_number: int = field(
+        metadata=field_options(alias="firmwareBuildNumber")
+    )
+    firmware_version: str = field(metadata=field_options(alias="firmwareVersion"))
+    hardware_board_type: int = field(metadata=field_options(alias="hardwareBoardType"))
+    product_name: str = field(metadata=field_options(alias="productName"))
+    serial_number: str = field(metadata=field_options(alias="serialNumber"))
+    display_name: str = field(
+        default="Elgato Light", metadata=field_options(alias="displayName")
+    )
+    mac_address: str | None = field(
+        default=None, metadata=field_options(alias="macAddress")
+    )
+    wifi: Wifi | None = field(default=None, metadata=field_options(alias="wifi-info"))
 
 
 class PowerOnBehavior(IntEnum):
@@ -194,6 +236,8 @@ class PowerOnBehavior(IntEnum):
     USE_DEFAULTS = 2
 
 
+@dataclass
+# pylint: disable-next=too-many-instance-attributes
 class Settings(BaseModel):
     """Object holding the Elgato Light device settings.
 
@@ -212,17 +256,30 @@ class Settings(BaseModel):
         switch_on_duration: Turn on transition time in milliseconds.
     """
 
+    color_change_duration: int = field(
+        metadata=field_options(alias="colorChangeDurationMs")
+    )
+    power_on_behavior: PowerOnBehavior = field(
+        metadata=field_options(alias="powerOnBehavior")
+    )
+    power_on_brightness: int = field(metadata=field_options(alias="powerOnBrightness"))
+    switch_off_duration: int = field(
+        metadata=field_options(alias="switchOffDurationMs")
+    )
+    switch_on_duration: int = field(metadata=field_options(alias="switchOnDurationMs"))
     battery: BatterySettings | None = None
-    color_change_duration: int = Field(..., alias="colorChangeDurationMs")
-    power_on_behavior: PowerOnBehavior = Field(..., alias="powerOnBehavior")
-    power_on_brightness: int = Field(..., alias="powerOnBrightness")
-    power_on_hue: float | None = Field(None, alias="powerOnHue")
-    power_on_saturation: float | None = Field(None, alias="powerOnSaturation")
-    power_on_temperature: int | None = Field(None, alias="powerOnTemperature")
-    switch_off_duration: int = Field(..., alias="switchOffDurationMs")
-    switch_on_duration: int = Field(..., alias="switchOnDurationMs")
+    power_on_hue: float | None = field(
+        default=None, metadata=field_options(alias="powerOnHue")
+    )
+    power_on_saturation: float | None = field(
+        default=None, metadata=field_options(alias="powerOnSaturation")
+    )
+    power_on_temperature: int | None = field(
+        default=None, metadata=field_options(alias="powerOnTemperature")
+    )
 
 
+@dataclass
 class State(BaseModel):
     """Object holding the Elgato Light state.
 
@@ -239,6 +296,6 @@ class State(BaseModel):
 
     on: bool
     brightness: int
-    hue: float | None
-    saturation: float | None
-    temperature: int | None
+    hue: float | None = field(default=None)
+    saturation: float | None = field(default=None)
+    temperature: int | None = field(default=None)
