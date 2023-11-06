@@ -26,7 +26,7 @@ async def test_json_request(aresponses: ResponsesMockServer) -> None:
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
         response = await elgato._request("test")
-        assert response["status"] == "ok"
+        assert response == '{"status": "ok"}'
         await elgato.close()
 
 
@@ -44,7 +44,7 @@ async def test_internal_session(aresponses: ResponsesMockServer) -> None:
     )
     async with Elgato("example.com") as elgato:
         response = await elgato._request("test")
-        assert response["status"] == "ok"
+        assert response == '{"status": "ok"}'
 
 
 async def test_put_request(aresponses: ResponsesMockServer) -> None:
@@ -62,7 +62,7 @@ async def test_put_request(aresponses: ResponsesMockServer) -> None:
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
         response = await elgato._request("test", method=METH_PUT, data={})
-        assert response["status"] == "ok"
+        assert response == '{"status": "ok"}'
 
 
 async def test_post_request(aresponses: ResponsesMockServer) -> None:
@@ -80,7 +80,7 @@ async def test_post_request(aresponses: ResponsesMockServer) -> None:
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
         response = await elgato._request("test", method=METH_POST, data={})
-        assert response["status"] == "ok"
+        assert response == '{"status": "ok"}'
 
 
 async def test_request_port(aresponses: ResponsesMockServer) -> None:
@@ -99,7 +99,7 @@ async def test_request_port(aresponses: ResponsesMockServer) -> None:
     async with ClientSession() as session:
         elgato = Elgato("example.com", port=3333, session=session)
         response = await elgato._request("test")
-        assert response["status"] == "ok"
+        assert response == '{"status": "ok"}'
 
 
 async def test_timeout(aresponses: ResponsesMockServer) -> None:
@@ -126,21 +126,6 @@ async def test_http_error400(aresponses: ResponsesMockServer) -> None:
         "/elgato/test",
         "GET",
         aresponses.Response(text="OMG PUPPIES!", status=404),
-    )
-
-    async with ClientSession() as session:
-        elgato = Elgato("example.com", session=session)
-        with pytest.raises(ElgatoError):
-            assert await elgato._request("test")
-
-
-async def test_unexpected_response(aresponses: ResponsesMockServer) -> None:
-    """Test unexpected response handling."""
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/test",
-        "GET",
-        aresponses.Response(text="OMG PUPPIES!", status=200),
     )
 
     async with ClientSession() as session:

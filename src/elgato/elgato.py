@@ -13,10 +13,10 @@ from typing import (
     Self,
     TypedDict,
     TypeVar,
-    cast,
 )
 
 import async_timeout
+import orjson
 from aiohttp.client import ClientError, ClientSession
 from aiohttp.hdrs import METH_GET, METH_POST, METH_PUT
 from yarl import URL
@@ -68,7 +68,7 @@ class Elgato:
         *,
         method: str = METH_GET,
         data: dict[str, Any] | None = None,
-    ) -> dict[str, Any]:
+    ) -> str:
         """Handle a request to a Elgato Light device.
 
         A generic method for sending/handling HTTP requests done against
@@ -82,8 +82,7 @@ class Elgato:
 
         Returns:
         -------
-            A Python dictionary (JSON decoded) with the response from
-            the Elgato Light API.
+            A Python string (JSON) with the response from the Elgato Light API.
 
         Raises:
         ------
@@ -128,13 +127,7 @@ class Elgato:
             msg = "Error occurred while communicating with Elgato Light device"
             raise ElgatoConnectionError(msg) from exception
 
-        content_type = response.headers.get("Content-Type", "")
-        if "application/json" not in content_type:
-            text = await response.text()
-            msg = "Unexpected response from the Elgato Light device"
-            raise ElgatoError(msg, {"Content-Type": content_type, "response": text})
-
-        return cast(dict[str, Any], await response.json())
+        return await response.text()
 
     async def has_battery(self) -> bool:
         """Check if the Elgato Light device has a battery.
@@ -158,7 +151,7 @@ class Elgato:
             of the Elgato light.
         """
         data = await self._request("battery-info")
-        return BatteryInfo.parse_obj(data)
+        return BatteryInfo.from_json(data)
 
     @requires_battery
     async def battery_bypass(self, *, on: bool) -> None:
@@ -223,7 +216,7 @@ class Elgato:
             on: A boolean, true to turn on energy saving, false otherwise.
         """
         current_settings = await self.battery_settings()
-        data = current_settings.energy_saving.dict(by_alias=True)
+        data = current_settings.energy_saving.to_dict()
 
         if on is not None:
             data["enable"] = int(on)
@@ -250,7 +243,7 @@ class Elgato:
             A Info object, with information about the Elgato Light device.
         """
         data = await self._request("accessory-info")
-        return Info.parse_obj(data)
+        return Info.from_json(data)
 
     async def settings(self) -> Settings:
         """Get device settings from Elgato Light device.
@@ -260,7 +253,7 @@ class Elgato:
             A Settings object, with information about the Elgato Light device.
         """
         data = await self._request("lights/settings")
-        return Settings.parse_obj(data)
+        return Settings.from_json(data)
 
     async def state(self) -> State:
         """Get the current state of Elgato Light device.
@@ -270,7 +263,9 @@ class Elgato:
             A State object, with the current Elgato Light state.
         """
         data = await self._request("lights")
-        return State.parse_obj(data["lights"][0])
+        # pylint: disable-next=no-member
+        lights = orjson.loads(data)["lights"]
+        return State.from_dict(lights[0])
 
     async def identify(self) -> None:
         """Identify this Elgato Light device by making it blink."""
@@ -403,7 +398,7 @@ class Elgato:
         await self._request(
             "/elgato/lights/settings",
             method=METH_PUT,
-            data=current_settings.dict(by_alias=True, exclude_none=True),
+            data=current_settings.to_dict(),
         )
 
     async def close(self) -> None:

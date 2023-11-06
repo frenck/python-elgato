@@ -9,9 +9,9 @@ from elgato import Elgato, State
 async def main() -> None:
     """Show example on controlling your Elgato Key device."""
     async with Elgato("elgato-key-light.local") as elgato:
-        await elgato.info()
+        print(await elgato.info())
 
-        await elgato.settings()
+        print(await elgato.settings())
 
         state: State = await elgato.state()
 
