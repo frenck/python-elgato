@@ -15,7 +15,6 @@ from typing import (
     TypeVar,
 )
 
-import async_timeout
 import orjson
 from aiohttp.client import ClientError, ClientSession
 from aiohttp.hdrs import METH_GET, METH_POST, METH_PUT
@@ -109,7 +108,7 @@ class Elgato:
             self._close_session = True
 
         try:
-            async with async_timeout.timeout(self.request_timeout):
+            async with asyncio.timeout(self.request_timeout):
                 response = await self.session.request(
                     method,
                     url,
