@@ -26,6 +26,8 @@ from .models import BatteryInfo, BatterySettings, Info, PowerOnBehavior, Setting
 if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
 
+VERSION = metadata.version(__package__)
+
 _ElgatoT = TypeVar("_ElgatoT", bound="Elgato")
 _R = TypeVar("_R")
 _P = ParamSpec("_P")
@@ -90,7 +92,6 @@ class Elgato:
             ElgatoError: Received an unexpected response from the Elgato Light
                 API.
         """
-        version = metadata.version(__package__)
         url = URL.build(
             scheme="http",
             host=self.host,
@@ -99,7 +100,7 @@ class Elgato:
         ).join(URL(uri))
 
         headers = {
-            "User-Agent": f"PythonElgato/{version}",
+            "User-Agent": f"PythonElgato/{VERSION}",
             "Accept": "application/json, text/plain, */*",
         }
 
