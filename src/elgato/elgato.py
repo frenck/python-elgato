@@ -4,7 +4,6 @@ from __future__ import annotations
 import asyncio
 import socket
 from dataclasses import dataclass
-from importlib import metadata
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -90,7 +89,6 @@ class Elgato:
             ElgatoError: Received an unexpected response from the Elgato Light
                 API.
         """
-        version = metadata.version(__package__)
         url = URL.build(
             scheme="http",
             host=self.host,
@@ -99,7 +97,7 @@ class Elgato:
         ).join(URL(uri))
 
         headers = {
-            "User-Agent": f"PythonElgato/{version}",
+            "User-Agent": "PythonElgato",
             "Accept": "application/json, text/plain, */*",
         }
 
