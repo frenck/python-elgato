@@ -4,7 +4,6 @@ from __future__ import annotations
 import asyncio
 import socket
 from dataclasses import dataclass
-from importlib import metadata
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -25,8 +24,6 @@ from .models import BatteryInfo, BatterySettings, Info, PowerOnBehavior, Setting
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
-
-VERSION = metadata.version(__package__)
 
 _ElgatoT = TypeVar("_ElgatoT", bound="Elgato")
 _R = TypeVar("_R")
@@ -100,7 +97,7 @@ class Elgato:
         ).join(URL(uri))
 
         headers = {
-            "User-Agent": f"PythonElgato/{VERSION}",
+            "User-Agent": "PythonElgato",
             "Accept": "application/json, text/plain, */*",
         }
 
