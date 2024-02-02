@@ -48,6 +48,7 @@ class EnergySavingAdjustBrightnessSettings(BaseModel):
     ----------
         brightness: Adjusted brightness when energy saving is active.
         enabled: boolean
+
     """
 
     brightness: int
@@ -70,6 +71,7 @@ class EnergySavingSettings(BaseModel):
         disable_wifi: Disable Wi-Fi when energy saving is active.
         enabled: boolean
         minimum_battery_level: Use energy saving when battery level is below this value.
+
     """
 
     adjust_brightness: EnergySavingAdjustBrightnessSettings = field(
@@ -95,6 +97,7 @@ class BatterySettings(BaseModel):
     ----------
         energy_saving: Energy saving settings.
         bypass: If the battery is bypassed (studio mode).
+
     """
 
     energy_saving: EnergySavingSettings = field(
@@ -114,6 +117,7 @@ class Wifi(BaseModel):
         frequency: The frequency in MHz of the Wi-Fi network connected.
         rssi: The signal strength in dBm of the Wi-Fi network connected.
         ssid: The SSID of the Wi-Fi network the device is connected to.
+
     """
 
     frequency: int = field(metadata=field_options(alias="frequencyMHz"))
@@ -159,6 +163,7 @@ class BatteryInfo(BaseModel):
         power_source: The power source of the device.
         status: The battery status.
         voltage: The current battery voltage in mV.
+
     """
 
     power_source: PowerSource = field(metadata=field_options(alias="powerSource"))
@@ -209,6 +214,7 @@ class Info(BaseModel):
         hardware_board_type: An integer indicating the board revision.
         product_name: The product name.
         serial_number: Serial number of the Elgato Light.
+
     """
 
     features: list[str]
@@ -254,6 +260,7 @@ class Settings(BaseModel):
         power_on_temperature: The temperature level used as default.
         switch_off_duration: Turn off transition time in milliseconds.
         switch_on_duration: Turn on transition time in milliseconds.
+
     """
 
     color_change_duration: int = field(
@@ -292,6 +299,7 @@ class State(BaseModel):
         hue:
         saturation:
         temperature: An integer representing the color temperature in mireds.
+
     """
 
     on: bool

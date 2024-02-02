@@ -88,6 +88,7 @@ class Elgato:
                 the Elgato Light.
             ElgatoError: Received an unexpected response from the Elgato Light
                 API.
+
         """
         url = URL.build(
             scheme="http",
@@ -132,6 +133,7 @@ class Elgato:
         Returns
         -------
             A boolean indicating if the Elgato Light device has a battery.
+
         """
         if self._has_battery is None:
             settings = await self.settings()
@@ -146,6 +148,7 @@ class Elgato:
         -------
             A BatteryInfo object, with information on the current battery state
             of the Elgato light.
+
         """
         data = await self._request("battery-info")
         return BatteryInfo.from_json(data)
@@ -165,6 +168,7 @@ class Elgato:
         Args:
         ----
             on: A boolean, true to turn on bypass, false otherwise.
+
         """
         await self._request(
             "/elgato/lights/settings",
@@ -180,6 +184,7 @@ class Elgato:
         Returns
         -------
             A Battery settings object, with information about the Elgato Light device.
+
         """
         settings = await self.settings()
         if settings.battery is None:
@@ -211,6 +216,7 @@ class Elgato:
             minimum_battery_level: The minimum battery level threshold to
                 trigger energy savings.
             on: A boolean, true to turn on energy saving, false otherwise.
+
         """
         current_settings = await self.battery_settings()
         data = current_settings.energy_saving.to_dict()
@@ -238,6 +244,7 @@ class Elgato:
         Returns
         -------
             A Info object, with information about the Elgato Light device.
+
         """
         data = await self._request("accessory-info")
         return Info.from_json(data)
@@ -248,6 +255,7 @@ class Elgato:
         Returns
         -------
             A Settings object, with information about the Elgato Light device.
+
         """
         data = await self._request("lights/settings")
         return Settings.from_json(data)
@@ -258,6 +266,7 @@ class Elgato:
         Returns
         -------
             A State object, with the current Elgato Light state.
+
         """
         data = await self._request("lights")
         # pylint: disable-next=no-member
@@ -278,6 +287,7 @@ class Elgato:
         Args:
         ----
             name: The name to give the Elgato Light device.
+
         """
         await self._request(
             "/elgato/accessory-info",
@@ -308,6 +318,7 @@ class Elgato:
         Raises:
         ------
             ElgatoError: The provided values are invalid.
+
         """
         if temperature and (hue or saturation):
             msg = "Cannot set temperature together with hue or saturation"
@@ -377,6 +388,7 @@ class Elgato:
             brightness: The power on brightness of the light, between 0 and 255.
             hue: The power on hue range as a float from 0 to 360 degrees.
             temperature: The power on color temperature of the light, in mired.
+
         """
         current_settings = await self.settings()
         if behavior is not None:
@@ -409,6 +421,7 @@ class Elgato:
         Returns
         -------
             The Elgato object.
+
         """
         return self
 
@@ -418,5 +431,6 @@ class Elgato:
         Args:
         ----
             _exc_info: Exec type.
+
         """
         await self.close()

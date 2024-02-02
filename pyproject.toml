@@ -47,7 +47,7 @@ pylint = "3.0.3"
 pytest = "7.4.4"
 pytest-asyncio = "0.23.4"
 pytest-cov = "4.1.0"
-ruff = "0.1.14"
+ruff = "0.2.0"
 safety = "3.0.1"
 yamllint = "1.33.0"
 
@@ -131,7 +131,7 @@ max-line-length = 88
 addopts = "--cov"
 asyncio_mode = "auto"
 
-[tool.ruff]
+[tool.ruff.lint]
 ignore = [
   "ANN101", # Self... explanatory
   "ANN401", # Opinioated warning on disallowing dynamically typed expressions
@@ -144,19 +144,20 @@ ignore = [
   "COM812",
   "ISC001",
 ]
+
 select = ["ALL"]
 
-[tool.ruff.flake8-pytest-style]
+[tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false
 mark-parentheses = false
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["elgato"]
 
 [tool.ruff.lint.flake8-type-checking]
 runtime-evaluated-base-classes = ["mashumaro.mixins.orjson.DataClassORJSONMixin"]
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 max-complexity = 25
 
 [build-system]
