@@ -1,4 +1,5 @@
 """Tests for the Elgato Lights Library."""
+
 # pylint: disable=protected-access
 import asyncio
 

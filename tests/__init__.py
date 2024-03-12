@@ -1,4 +1,5 @@
 """Asynchronous Python client for Elgato Lights."""
+
 from pathlib import Path
 
 
