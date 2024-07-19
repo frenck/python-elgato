@@ -194,7 +194,7 @@ class Elgato:
 
     @requires_battery
     # pylint: disable-next=too-many-arguments
-    async def energy_saving(  # noqa: PLR0913
+    async def energy_saving(
         self,
         *,
         adjust_brightness: bool | None = None,
@@ -297,7 +297,7 @@ class Elgato:
         )
 
     # pylint: disable-next=too-many-arguments
-    async def light(  # noqa: PLR0913
+    async def light(
         self,
         *,
         on: bool | None = None,
