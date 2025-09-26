@@ -26,7 +26,7 @@ async def test_battery_info_no_battery(aresponses: ResponsesMockServer) -> None:
         assert await elgato.has_battery() is False
         with pytest.raises(
             ElgatoNoBatteryError,
-            match="The Elgato light does not have a battery.",
+            match=r"The Elgato light does not have a battery\.",
         ):
             await elgato.battery()
 
@@ -85,7 +85,7 @@ async def test_battery_bypass_no_battery(aresponses: ResponsesMockServer) -> Non
         assert await elgato.has_battery() is False
         with pytest.raises(
             ElgatoNoBatteryError,
-            match="The Elgato light does not have a battery.",
+            match=r"The Elgato light does not have a battery\.",
         ):
             await elgato.battery_bypass(on=True)
 
