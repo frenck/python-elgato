@@ -36,6 +36,43 @@ Known compatible and tested Elgato devices:
 pip install elgato
 ```
 
+To install with the optional CLI:
+
+```bash
+pip install "elgato[cli]"
+```
+
+## CLI
+
+The optional CLI lets you control Elgato Lights directly from the terminal.
+The `--host` option can also be set via the `ELGATO_HOST` environment variable.
+
+```bash
+# Show device information
+elgato info --host elgato-key-light.local
+
+# Show the current light state
+elgato state --host elgato-key-light.local
+
+# Turn the light on (optionally set brightness and temperature)
+elgato on --host elgato-key-light.local --brightness 80 --temperature 200
+
+# Turn the light off
+elgato off --host elgato-key-light.local
+
+# Identify the light (makes it blink)
+elgato identify --host elgato-key-light.local
+
+# Restart the device
+elgato restart --host elgato-key-light.local
+
+# Emit machine-readable JSON
+elgato state --host elgato-key-light.local --json
+
+# Scan the network for Elgato Lights (uses mDNS/Zeroconf)
+elgato scan
+```
+
 ## Usage
 
 The client is an async context manager; every API call is a coroutine. A

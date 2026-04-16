@@ -1,0 +1,128 @@
+# serializer version: 1
+# name: test_cli_structure
+  dict({
+    'identify': list([
+      'host',
+      'port',
+    ]),
+    'info': list([
+      'host',
+      'output_json',
+      'port',
+    ]),
+    'off': list([
+      'host',
+      'port',
+    ]),
+    'on': list([
+      'brightness',
+      'host',
+      'port',
+      'temperature',
+    ]),
+    'restart': list([
+      'host',
+      'port',
+    ]),
+    'scan': list([
+      'quiet',
+    ]),
+    'state': list([
+      'host',
+      'output_json',
+      'port',
+    ]),
+  })
+# ---
+# name: test_connection_error_handler
+  '''
+  ╭───────────────────────── Connection error ─────────────────────────╮
+  │                                                                    │
+  │     Could not connect to the Elgato Light device. Please check the │
+  │     hostname/IP address and ensure the device is powered on and    │
+  │     reachable on the network.                                      │
+  │                                                                    │
+  ╰────────────────────────────────────────────────────────────────────╯
+  
+  '''
+# ---
+# name: test_elgato_error_handler
+  '''
+  ╭──── Elgato error ────╮
+  │ something went wrong │
+  ╰──────────────────────╯
+  
+  '''
+# ---
+# name: test_info
+  '''
+           Elgato Light — Frenck         
+  ┏━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┓
+  ┃ Property        ┃ Value             ┃
+  ┡━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━┩
+  │ Product         │ Elgato Key Light  │
+  │ Serial number   │ CN11A1A00001      │
+  │ Display name    │ Frenck            │
+  │ Firmware        │ 1.0.3 (build 218) │
+  │ Hardware board  │ 53                │
+  │ MAC address     │ AA:BB:CC:DD:EE:FF │
+  │ Wi-Fi SSID      │ Frenck-IoT        │
+  │ Wi-Fi RSSI      │ -48 dBm           │
+  │ Wi-Fi frequency │ 2400 MHz          │
+  └─────────────────┴───────────────────┘
+  
+  '''
+# ---
+# name: test_info_json
+  '''
+  {
+    "product_name": "Elgato Key Light",
+    "serial_number": "CN11A1A00001",
+    "display_name": "Frenck",
+    "firmware_version": "1.0.3",
+    "firmware_build_number": 218,
+    "hardware_board_type": 53,
+    "mac_address": "AA:BB:CC:DD:EE:FF",
+    "features": [
+      "lights"
+    ]
+  }
+  
+  '''
+# ---
+# name: test_state_json
+  '''
+  {
+    "on": true,
+    "brightness": 80,
+    "temperature": 230
+  }
+  
+  '''
+# ---
+# name: test_state_off
+  '''
+          Light State        
+  ┏━━━━━━━━━━━━━┳━━━━━━━━━━━┓
+  ┃ Property    ┃ Value     ┃
+  ┡━━━━━━━━━━━━━╇━━━━━━━━━━━┩
+  │ Power       │ off       │
+  │ Brightness  │ 0%        │
+  │ Temperature │ 200 mired │
+  └─────────────┴───────────┘
+  
+  '''
+# ---
+# name: test_state_on
+  '''
+          Light State        
+  ┏━━━━━━━━━━━━━┳━━━━━━━━━━━┓
+  ┃ Property    ┃ Value     ┃
+  ┡━━━━━━━━━━━━━╇━━━━━━━━━━━┩
+  │ Power       │ on        │
+  │ Brightness  │ 80%       │
+  │ Temperature │ 230 mired │
+  └─────────────┴───────────┘
+  
+  '''
+# ---
