@@ -68,7 +68,7 @@ class Elgato:
         method: str = METH_GET,
         data: dict[str, Any] | None = None,
     ) -> str:
-        """Handle a request to a Elgato Light device.
+        """Handle a request to an Elgato Light device.
 
         A generic method for sending/handling HTTP requests done against
         the Elgato Light API.
@@ -116,7 +116,7 @@ class Elgato:
                     headers=headers,
                 )
                 response.raise_for_status()
-        except asyncio.TimeoutError as exception:
+        except TimeoutError as exception:
             msg = "Timeout occurred while connecting to Elgato Light device"
             raise ElgatoConnectionError(msg) from exception
         except (
@@ -158,7 +158,7 @@ class Elgato:
     async def battery_bypass(self, *, on: bool) -> None:
         """Change the bypass mode of the Elgato Light device.
 
-        In the app this is also called "Studio mode". When the bypass mode is
+        In the app this is also called "Studio mode". When the bypass mode is on,
         the battery isn't used and would only work when the device is plugged
         into mains.
 
@@ -172,7 +172,7 @@ class Elgato:
 
         """
         await self._request(
-            "/elgato/lights/settings",
+            "lights/settings",
             method=METH_PUT,
             data={"battery": {"bypass": int(on)}},
         )
@@ -234,7 +234,7 @@ class Elgato:
             data["adjustBrightness"]["brightness"] = brightness
 
         await self._request(
-            "/elgato/lights/settings",
+            "lights/settings",
             method=METH_PUT,
             data={"battery": {"energySaving": data}},
         )
@@ -291,7 +291,7 @@ class Elgato:
 
         """
         await self._request(
-            "/elgato/accessory-info",
+            "accessory-info",
             method=METH_PUT,
             data={"displayName": name},
         )
@@ -311,7 +311,7 @@ class Elgato:
         Args:
         ----
             on: A boolean, true to turn the light on, false otherwise.
-            brightness: The brightness of the light, between 0 and 255.
+            brightness: The brightness of the light, between 0 and 100.
             hue: The hue range as a float from 0 to 360 degrees.
             saturation: The color saturation as a float from 0 to 100.
             temperature: The color temperature of the light, in mired.
@@ -386,7 +386,7 @@ class Elgato:
         Args:
         ----
             behavior: The power on behavior to set.
-            brightness: The power on brightness of the light, between 0 and 255.
+            brightness: The power on brightness of the light, between 0 and 100.
             hue: The power on hue range as a float from 0 to 360 degrees.
             temperature: The power on color temperature of the light, in mired.
 
@@ -406,7 +406,7 @@ class Elgato:
             current_settings.battery = None
 
         await self._request(
-            "/elgato/lights/settings",
+            "lights/settings",
             method=METH_PUT,
             data=current_settings.to_dict(),
         )

@@ -1,4 +1,4 @@
-# pylint: disable=W0621
+# pylint: disable=redefined-outer-name
 """Asynchronous Python client for Elgato Lights."""
 
 import asyncio
@@ -7,7 +7,7 @@ from elgato import Elgato
 
 
 async def main() -> None:
-    """Show example of programmatically change the display name of a Elgato Light."""
+    """Show how to programmatically change the display name of an Elgato Light."""
     async with Elgato("elgato-key-light.local") as elgato:
         # Current name
         await elgato.info()

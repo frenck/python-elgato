@@ -11,7 +11,7 @@ class ElgatoConnectionError(ElgatoError):
     """Elgato Light connection exception."""
 
 
-class ElgatoNoBatteryError(Exception):
+class ElgatoNoBatteryError(ElgatoError):
     """Elgato light does not have a battery."""
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
