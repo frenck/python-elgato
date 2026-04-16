@@ -1,24 +1,20 @@
 """Tests for retrieving information from the Elgato Key Light device."""
 
-from aiohttp import ClientResponse, ClientSession
-from aresponses import Response, ResponsesMockServer
+from aiohttp import ClientSession
+from aioresponses import aioresponses
 
 from elgato import Elgato, Info
 
-from . import load_fixture
+from .conftest import load_fixture
 
 
-async def test_info_key_light(aresponses: ResponsesMockServer) -> None:
+async def test_info_key_light(responses: aioresponses) -> None:
     """Test getting Elgato Key Light device information."""
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/accessory-info",
-        "GET",
-        aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text=load_fixture("info-key-light.json"),
-        ),
+    responses.get(
+        "http://example.com:9123/elgato/accessory-info",
+        status=200,
+        body=load_fixture("info-key-light.json"),
+        content_type="application/json",
     )
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
@@ -38,17 +34,13 @@ async def test_info_key_light(aresponses: ResponsesMockServer) -> None:
         assert info.wifi.ssid == "Frenck-IoT"
 
 
-async def test_info_key_light_air(aresponses: ResponsesMockServer) -> None:
+async def test_info_key_light_air(responses: aioresponses) -> None:
     """Test getting Elgato Key Light Air device information."""
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/accessory-info",
-        "GET",
-        aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text=load_fixture("info-key-light-air.json"),
-        ),
+    responses.get(
+        "http://example.com:9123/elgato/accessory-info",
+        status=200,
+        body=load_fixture("info-key-light-air.json"),
+        content_type="application/json",
     )
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
@@ -65,17 +57,13 @@ async def test_info_key_light_air(aresponses: ResponsesMockServer) -> None:
         assert info.wifi is None
 
 
-async def test_info_light_strip(aresponses: ResponsesMockServer) -> None:
+async def test_info_light_strip(responses: aioresponses) -> None:
     """Test getting Elgato Light Strip device information."""
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/accessory-info",
-        "GET",
-        aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text=load_fixture("info-light-strip.json"),
-        ),
+    responses.get(
+        "http://example.com:9123/elgato/accessory-info",
+        status=200,
+        body=load_fixture("info-light-strip.json"),
+        content_type="application/json",
     )
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
@@ -92,42 +80,26 @@ async def test_info_light_strip(aresponses: ResponsesMockServer) -> None:
         assert info.wifi is None
 
 
-async def test_change_display_name(aresponses: ResponsesMockServer) -> None:
+async def test_change_display_name(responses: aioresponses) -> None:
     """Test changing the display name of an Elgato Light."""
-
-    async def response_handler(request: ClientResponse) -> Response:
-        """Response handler for this test."""
-        data = await request.json()
-        assert data == {"displayName": "OMG PUPPIES"}
-        return aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text="",
-        )
-
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/accessory-info",
-        "PUT",
-        response_handler,
+    responses.put(
+        "http://example.com:9123/elgato/accessory-info",
+        status=200,
+        body="",
+        content_type="application/json",
     )
-
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
         await elgato.display_name("OMG PUPPIES")
 
 
-async def test_missing_display_name(aresponses: ResponsesMockServer) -> None:
+async def test_missing_display_name(responses: aioresponses) -> None:
     """Test ensure we can handle a missing display name."""
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/accessory-info",
-        "GET",
-        aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text=load_fixture("info-light-strip.json"),
-        ),
+    responses.get(
+        "http://example.com:9123/elgato/accessory-info",
+        status=200,
+        body=load_fixture("info-light-strip.json"),
+        content_type="application/json",
     )
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)

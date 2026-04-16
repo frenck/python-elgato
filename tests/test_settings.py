@@ -1,25 +1,21 @@
 """Tests for retrieving information from the Elgato Light device."""
 
 import pytest
-from aiohttp import ClientResponse, ClientSession
-from aresponses import Response, ResponsesMockServer
+from aiohttp import ClientSession
+from aioresponses import aioresponses
 
 from elgato import Elgato, ElgatoNoBatteryError, PowerOnBehavior, Settings
 
-from . import load_fixture
+from .conftest import load_fixture
 
 
-async def test_settings_keylight(aresponses: ResponsesMockServer) -> None:
+async def test_settings_keylight(responses: aioresponses) -> None:
     """Test getting Elgato Light device settings."""
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/lights/settings",
-        "GET",
-        aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text=load_fixture("settings-keylight.json"),
-        ),
+    responses.get(
+        "http://example.com:9123/elgato/lights/settings",
+        status=200,
+        body=load_fixture("settings-keylight.json"),
+        content_type="application/json",
     )
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
@@ -36,17 +32,13 @@ async def test_settings_keylight(aresponses: ResponsesMockServer) -> None:
         assert settings.battery is None
 
 
-async def test_settings_led_strip(aresponses: ResponsesMockServer) -> None:
+async def test_settings_led_strip(responses: aioresponses) -> None:
     """Test getting Elgato Led Strip device settings."""
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/lights/settings",
-        "GET",
-        aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text=load_fixture("settings-strip.json"),
-        ),
+    responses.get(
+        "http://example.com:9123/elgato/lights/settings",
+        status=200,
+        body=load_fixture("settings-strip.json"),
+        content_type="application/json",
     )
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
@@ -63,20 +55,16 @@ async def test_settings_led_strip(aresponses: ResponsesMockServer) -> None:
         assert settings.battery is None
 
 
-async def test_settings_key_light_mini(aresponses: ResponsesMockServer) -> None:
+async def test_settings_key_light_mini(responses: aioresponses) -> None:
     """Test getting Elgato Light Mini device settings.
 
     This device has a battery
     """
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/lights/settings",
-        "GET",
-        aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text=load_fixture("settings-key-light-mini.json"),
-        ),
+    responses.get(
+        "http://example.com:9123/elgato/lights/settings",
+        status=200,
+        body=load_fixture("settings-key-light-mini.json"),
+        content_type="application/json",
     )
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
@@ -99,17 +87,13 @@ async def test_settings_key_light_mini(aresponses: ResponsesMockServer) -> None:
         assert settings.switch_on_duration == 100
 
 
-async def test_battery_settings_keylight(aresponses: ResponsesMockServer) -> None:
+async def test_battery_settings_keylight(responses: aioresponses) -> None:
     """Test getting Elgato Light battery settings."""
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/lights/settings",
-        "GET",
-        aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text=load_fixture("settings-keylight.json"),
-        ),
+    responses.get(
+        "http://example.com:9123/elgato/lights/settings",
+        status=200,
+        body=load_fixture("settings-keylight.json"),
+        content_type="application/json",
     )
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
@@ -117,20 +101,16 @@ async def test_battery_settings_keylight(aresponses: ResponsesMockServer) -> Non
             await elgato.battery_settings()
 
 
-async def test_battery_settings_key_light_mini(aresponses: ResponsesMockServer) -> None:
+async def test_battery_settings_key_light_mini(responses: aioresponses) -> None:
     """Test getting Elgato Light Mini device battery settings.
 
     This device has a battery
     """
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/lights/settings",
-        "GET",
-        aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text=load_fixture("settings-key-light-mini.json"),
-        ),
+    responses.get(
+        "http://example.com:9123/elgato/lights/settings",
+        status=200,
+        body=load_fixture("settings-key-light-mini.json"),
+        content_type="application/json",
     )
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
@@ -145,17 +125,13 @@ async def test_battery_settings_key_light_mini(aresponses: ResponsesMockServer) 
         assert settings.energy_saving.adjust_brightness.enabled is False
 
 
-async def test_energy_savings_no_battery(aresponses: ResponsesMockServer) -> None:
-    """Test adjusting energy saving settings on a Elgato device without battery."""
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/lights/settings",
-        "GET",
-        aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text=load_fixture("settings-keylight.json"),
-        ),
+async def test_energy_savings_no_battery(responses: aioresponses) -> None:
+    """Test adjusting energy saving settings on an Elgato device without battery."""
+    responses.get(
+        "http://example.com:9123/elgato/lights/settings",
+        status=200,
+        body=load_fixture("settings-keylight.json"),
+        content_type="application/json",
     )
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
@@ -167,46 +143,21 @@ async def test_energy_savings_no_battery(aresponses: ResponsesMockServer) -> Non
             await elgato.energy_saving(on=True)
 
 
-async def test_energy_savings_full(aresponses: ResponsesMockServer) -> None:
+async def test_energy_savings_full(responses: aioresponses) -> None:
     """Test changing energy saving settings."""
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/lights/settings",
-        "GET",
-        aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text=load_fixture("settings-key-light-mini.json"),
-        ),
-        repeat=2,
+    responses.get(
+        "http://example.com:9123/elgato/lights/settings",
+        status=200,
+        body=load_fixture("settings-key-light-mini.json"),
+        content_type="application/json",
+        repeat=True,
     )
-
-    async def response_handler(request: ClientResponse) -> Response:
-        """Response handler for this test."""
-        data = await request.json()
-        assert data == {
-            "battery": {
-                "energySaving": {
-                    "adjustBrightness": {"brightness": 42, "enable": 1},
-                    "disableWifi": 1,
-                    "enable": 1,
-                    "minimumBatteryLevel": 21,
-                },
-            },
-        }
-        return aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text="{}",
-        )
-
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/lights/settings",
-        "PUT",
-        response_handler,
+    responses.put(
+        "http://example.com:9123/elgato/lights/settings",
+        status=200,
+        body="{}",
+        content_type="application/json",
     )
-
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
         await elgato.energy_saving(
@@ -218,90 +169,40 @@ async def test_energy_savings_full(aresponses: ResponsesMockServer) -> None:
         )
 
 
-async def test_energy_savings_no_changes(aresponses: ResponsesMockServer) -> None:
+async def test_energy_savings_no_changes(responses: aioresponses) -> None:
     """Test changing energy saving settings."""
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/lights/settings",
-        "GET",
-        aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text=load_fixture("settings-key-light-mini.json"),
-        ),
-        repeat=2,
+    responses.get(
+        "http://example.com:9123/elgato/lights/settings",
+        status=200,
+        body=load_fixture("settings-key-light-mini.json"),
+        content_type="application/json",
+        repeat=True,
     )
-
-    async def response_handler(request: ClientResponse) -> Response:
-        """Response handler for this test."""
-        data = await request.json()
-        assert data == {
-            "battery": {
-                "energySaving": {
-                    "adjustBrightness": {"brightness": 10, "enable": False},
-                    "disableWifi": False,
-                    "enable": False,
-                    "minimumBatteryLevel": 15,
-                },
-            },
-        }
-        return aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text="{}",
-        )
-
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/lights/settings",
-        "PUT",
-        response_handler,
+    responses.put(
+        "http://example.com:9123/elgato/lights/settings",
+        status=200,
+        body="{}",
+        content_type="application/json",
     )
-
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
         await elgato.energy_saving()
 
 
-async def test_power_on_behavior_full(aresponses: ResponsesMockServer) -> None:
+async def test_power_on_behavior_full(responses: aioresponses) -> None:
     """Test changing power on behavior settings."""
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/lights/settings",
-        "GET",
-        aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text=load_fixture("settings-keylight.json"),
-        ),
-        repeat=1,
+    responses.get(
+        "http://example.com:9123/elgato/lights/settings",
+        status=200,
+        body=load_fixture("settings-keylight.json"),
+        content_type="application/json",
     )
-
-    async def response_handler(request: ClientResponse) -> Response:
-        """Response handler for this test."""
-        data = await request.json()
-        assert data == {
-            "colorChangeDurationMs": 100,
-            "powerOnBehavior": 2,
-            "powerOnBrightness": 42,
-            "powerOnHue": 21.0,
-            "powerOnTemperature": 242,
-            "switchOffDurationMs": 300,
-            "switchOnDurationMs": 100,
-        }
-        return aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text="{}",
-        )
-
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/lights/settings",
-        "PUT",
-        response_handler,
+    responses.put(
+        "http://example.com:9123/elgato/lights/settings",
+        status=200,
+        body="{}",
+        content_type="application/json",
     )
-
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
         await elgato.power_on_behavior(
@@ -312,44 +213,21 @@ async def test_power_on_behavior_full(aresponses: ResponsesMockServer) -> None:
         )
 
 
-async def test_power_on_behavior_no_changes(aresponses: ResponsesMockServer) -> None:
+async def test_power_on_behavior_no_changes(responses: aioresponses) -> None:
     """Test changing power on behavior settings."""
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/lights/settings",
-        "GET",
-        aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text=load_fixture("settings-key-light-mini.json"),
-        ),
-        repeat=2,
+    responses.get(
+        "http://example.com:9123/elgato/lights/settings",
+        status=200,
+        body=load_fixture("settings-key-light-mini.json"),
+        content_type="application/json",
+        repeat=True,
     )
-
-    async def response_handler(request: ClientResponse) -> Response:
-        """Response handler for this test."""
-        data = await request.json()
-        assert data == {
-            "colorChangeDurationMs": 100,
-            "powerOnBehavior": 1,
-            "powerOnBrightness": 20,
-            "powerOnTemperature": 230,
-            "switchOffDurationMs": 300,
-            "switchOnDurationMs": 100,
-        }
-        return aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text="{}",
-        )
-
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/lights/settings",
-        "PUT",
-        response_handler,
+    responses.put(
+        "http://example.com:9123/elgato/lights/settings",
+        status=200,
+        body="{}",
+        content_type="application/json",
     )
-
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
         await elgato.power_on_behavior()

@@ -1,4 +1,4 @@
-# pylint: disable=W0621
+# pylint: disable=redefined-outer-name
 """Asynchronous Python client for Elgato Lights."""
 
 import asyncio
@@ -7,7 +7,7 @@ from elgato import Elgato, State
 
 
 async def main() -> None:
-    """Show example on controlling your Elgato Key device."""
+    """Show example on controlling your Elgato Light device."""
     async with Elgato("elgato-key-light.local") as elgato:
         print(await elgato.info())
 

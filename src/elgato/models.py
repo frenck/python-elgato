@@ -111,7 +111,7 @@ class BatterySettings(BaseModel):
 class Wifi(BaseModel):
     """Object holding the Elgato device Wi-Fi information.
 
-    This object holds wireles information about the Elgato device.
+    This object holds wireless information about the Elgato device.
 
     Attributes
     ----------
@@ -158,7 +158,7 @@ class BatteryInfo(BaseModel):
         charge_power: The charge power in W.
         charge_voltage: The charge voltage in V.
         input_charge_current: The charge current in mA.
-        input_charge_voltage: The charge voltage in mV.
+        input_charge_power: The charge power in mW.
         input_charge_voltage: The charge voltage in mV.
         level: The battery level of the device in %.
         power_source: The power source of the device.
@@ -295,10 +295,10 @@ class State(BaseModel):
 
     Attributes
     ----------
-        on: A boolean indicating the if the light if on or off.
-        brightness: An integer between 0 and 255, representing the brightness.
-        hue:
-        saturation:
+        on: A boolean indicating if the light is on or off.
+        brightness: An integer between 0 and 100, representing the brightness.
+        hue: The hue range as a float from 0 to 360 degrees.
+        saturation: The color saturation as a float from 0 to 100.
         temperature: An integer representing the color temperature in mireds.
 
     """

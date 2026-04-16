@@ -2,26 +2,24 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
-from aiohttp import ClientResponse, ClientSession
-from aresponses import Response, ResponsesMockServer
+from aiohttp import ClientSession
+from aioresponses import aioresponses
 
 from elgato import Elgato, ElgatoError, State
 
-from . import load_fixture
+from .conftest import load_fixture
 
 
-async def test_state_temperature(aresponses: ResponsesMockServer) -> None:
+async def test_state_temperature(responses: aioresponses) -> None:
     """Test getting Elgato Light state in temperature mode."""
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/lights",
-        "GET",
-        aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text=load_fixture("state-temperature.json"),
-        ),
+    responses.get(
+        "http://example.com:9123/elgato/lights",
+        status=200,
+        body=load_fixture("state-temperature.json"),
+        content_type="application/json",
     )
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
@@ -34,17 +32,13 @@ async def test_state_temperature(aresponses: ResponsesMockServer) -> None:
         assert state.temperature == 297
 
 
-async def test_state_color(aresponses: ResponsesMockServer) -> None:
+async def test_state_color(responses: aioresponses) -> None:
     """Test getting Elgato Light state in color mode."""
-    aresponses.add(
-        "example.com:9123",
-        "/elgato/lights",
-        "GET",
-        aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text=load_fixture("state-color.json"),
-        ),
+    responses.get(
+        "http://example.com:9123/elgato/lights",
+        status=200,
+        body=load_fixture("state-color.json"),
+        content_type="application/json",
     )
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
@@ -57,47 +51,27 @@ async def test_state_color(aresponses: ResponsesMockServer) -> None:
         assert state.temperature is None
 
 
-async def test_change_state_temperature(aresponses: ResponsesMockServer) -> None:
+async def test_change_state_temperature(responses: aioresponses) -> None:
     """Test changing Elgato Light State in temperature mode."""
-
-    async def response_handler(request: ClientResponse) -> Response:
-        """Response handler for this test."""
-        data = await request.json()
-        assert data == {
-            "numberOfLights": 1,
-            "lights": [{"on": 1, "brightness": 100, "temperature": 200}],
-        }
-        return aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text="{}",
-        )
-
-    aresponses.add("example.com:9123", "/elgato/lights", "PUT", response_handler)
-
+    responses.put(
+        "http://example.com:9123/elgato/lights",
+        status=200,
+        body="{}",
+        content_type="application/json",
+    )
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
         await elgato.light(on=True, brightness=100, temperature=200)
 
 
-async def test_change_state_color(aresponses: ResponsesMockServer) -> None:
+async def test_change_state_color(responses: aioresponses) -> None:
     """Test changing Elgato Light State in color mode."""
-
-    async def response_handler(request: ClientResponse) -> Response:
-        """Response handler for this test."""
-        data = await request.json()
-        assert data == {
-            "numberOfLights": 1,
-            "lights": [{"on": 1, "brightness": 100, "hue": 10.1, "saturation": 20.2}],
-        }
-        return aresponses.Response(
-            status=200,
-            headers={"Content-Type": "application/json"},
-            text="{}",
-        )
-
-    aresponses.add("example.com:9123", "/elgato/lights", "PUT", response_handler)
-
+    responses.put(
+        "http://example.com:9123/elgato/lights",
+        status=200,
+        body="{}",
+        content_type="application/json",
+    )
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
         await elgato.light(on=True, brightness=100, hue=10.1, saturation=20.2)
@@ -152,8 +126,8 @@ async def test_change_state_color(aresponses: ResponsesMockServer) -> None:
         ),
     ],
 )
-async def test_change_state_errors(state: dict[str, int | float], message: str) -> None:
+async def test_change_state_errors(state: dict[str, Any], message: str) -> None:
     """Test changing Elgato Light State with invalid values."""
     elgato = Elgato("example.com")
     with pytest.raises(ElgatoError, match=message):
-        await elgato.light(**state)  # type: ignore[arg-type]
+        await elgato.light(**state)

@@ -83,11 +83,11 @@ repos:
         types: [text]
         entry: poetry run end-of-file-fixer
         stages: [commit, push, manual]
-      - id: mypy
-        name: 🆎 Static type checking using mypy
+      - id: ty
+        name: 🆎 Static type checking using ty
         language: system
         types: [python]
-        entry: poetry run mypy
+        entry: poetry run ty check
         require_serial: true
       - id: no-commit-to-branch
         name: 🛑 Don't commit to main branch
@@ -131,3 +131,9 @@ repos:
         language: system
         types: [yaml]
         entry: poetry run yamllint
+      - id: zizmor
+        name: 🌈 Check GitHub Actions workflows with zizmor
+        language: system
+        types: [yaml]
+        files: ^\.github/workflows/
+        entry: poetry run zizmor
