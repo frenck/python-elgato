@@ -122,9 +122,7 @@ def test_info(
     """Info command prints a device information table."""
     mock_cls = mock_elgato_class(info_data=key_light_info)
     with patch("elgato.cli.Elgato", mock_cls):
-        result = runner.invoke(
-            cli, ["info", "--host", "example.com"]
-        )
+        result = runner.invoke(cli, ["info", "--host", "example.com"])
     assert result.exit_code == 0
     assert result.stdout == snapshot
 
@@ -137,9 +135,7 @@ def test_info_json(
     """Info command emits JSON when --json is given."""
     mock_cls = mock_elgato_class(info_data=key_light_info)
     with patch("elgato.cli.Elgato", mock_cls):
-        result = runner.invoke(
-            cli, ["info", "--host", "example.com", "--json"]
-        )
+        result = runner.invoke(cli, ["info", "--host", "example.com", "--json"])
     assert result.exit_code == 0
     assert result.stdout == snapshot
 
@@ -152,9 +148,7 @@ def test_state_on(
     """State command prints a table when the light is on."""
     mock_cls = mock_elgato_class(state_data=light_state_on)
     with patch("elgato.cli.Elgato", mock_cls):
-        result = runner.invoke(
-            cli, ["state", "--host", "example.com"]
-        )
+        result = runner.invoke(cli, ["state", "--host", "example.com"])
     assert result.exit_code == 0
     assert result.stdout == snapshot
 
@@ -167,9 +161,7 @@ def test_state_off(
     """State command prints a table when the light is off."""
     mock_cls = mock_elgato_class(state_data=light_state_off)
     with patch("elgato.cli.Elgato", mock_cls):
-        result = runner.invoke(
-            cli, ["state", "--host", "example.com"]
-        )
+        result = runner.invoke(cli, ["state", "--host", "example.com"])
     assert result.exit_code == 0
     assert result.stdout == snapshot
 
@@ -182,9 +174,7 @@ def test_state_json(
     """State command emits JSON when --json is given."""
     mock_cls = mock_elgato_class(state_data=light_state_on)
     with patch("elgato.cli.Elgato", mock_cls):
-        result = runner.invoke(
-            cli, ["state", "--host", "example.com", "--json"]
-        )
+        result = runner.invoke(cli, ["state", "--host", "example.com", "--json"])
     assert result.exit_code == 0
     assert result.stdout == snapshot
 
@@ -193,15 +183,11 @@ def test_on(runner: CliRunner) -> None:
     """On command turns the light on."""
     mock_cls = mock_elgato_class()
     with patch("elgato.cli.Elgato", mock_cls):
-        result = runner.invoke(
-            cli, ["on", "--host", "example.com"]
-        )
+        result = runner.invoke(cli, ["on", "--host", "example.com"])
     assert result.exit_code == 0
     assert "Light turned on." in result.stdout
     client = mock_cls.return_value.__aenter__.return_value
-    client.light.assert_called_once_with(
-        on=True, brightness=None, temperature=None
-    )
+    client.light.assert_called_once_with(on=True, brightness=None, temperature=None)
 
 
 def test_on_with_options(runner: CliRunner) -> None:
@@ -222,18 +208,14 @@ def test_on_with_options(runner: CliRunner) -> None:
         )
     assert result.exit_code == 0
     client = mock_cls.return_value.__aenter__.return_value
-    client.light.assert_called_once_with(
-        on=True, brightness=80, temperature=200
-    )
+    client.light.assert_called_once_with(on=True, brightness=80, temperature=200)
 
 
 def test_off(runner: CliRunner) -> None:
     """Off command turns the light off."""
     mock_cls = mock_elgato_class()
     with patch("elgato.cli.Elgato", mock_cls):
-        result = runner.invoke(
-            cli, ["off", "--host", "example.com"]
-        )
+        result = runner.invoke(cli, ["off", "--host", "example.com"])
     assert result.exit_code == 0
     assert "Light turned off." in result.stdout
     client = mock_cls.return_value.__aenter__.return_value
@@ -244,9 +226,7 @@ def test_identify(runner: CliRunner) -> None:
     """Identify command calls identify on the device."""
     mock_cls = mock_elgato_class()
     with patch("elgato.cli.Elgato", mock_cls):
-        result = runner.invoke(
-            cli, ["identify", "--host", "example.com"]
-        )
+        result = runner.invoke(cli, ["identify", "--host", "example.com"])
     assert result.exit_code == 0
     assert "blinking" in result.stdout
     client = mock_cls.return_value.__aenter__.return_value
@@ -257,9 +237,7 @@ def test_restart(runner: CliRunner) -> None:
     """Restart command calls restart on the device."""
     mock_cls = mock_elgato_class()
     with patch("elgato.cli.Elgato", mock_cls):
-        result = runner.invoke(
-            cli, ["restart", "--host", "example.com"]
-        )
+        result = runner.invoke(cli, ["restart", "--host", "example.com"])
     assert result.exit_code == 0
     assert "restarting" in result.stdout
     client = mock_cls.return_value.__aenter__.return_value
