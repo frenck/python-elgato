@@ -183,9 +183,9 @@ class AsyncTyper(SyncTyper):
             raise
         # pylint: disable-next=broad-except
         except Exception as e:
-            if (
-                not hasattr(self, "error_handlers")
-                or (handler := self.error_handlers.get(type(e))) is None
-            ):
+            if not hasattr(self, "error_handlers"):
                 raise
-            return handler(e)
+            for cls in type(e).__mro__:
+                if (handler := self.error_handlers.get(cls)) is not None:  # ty: ignore[invalid-argument-type]
+                    return handler(e)
+            raise

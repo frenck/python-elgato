@@ -3,6 +3,7 @@
 # pylint: disable=redefined-outer-name
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -10,6 +11,7 @@ import click
 import pytest
 from typer.main import get_command
 from typer.testing import CliRunner
+from zeroconf import ServiceStateChange
 
 from elgato.cli import cli
 from elgato.exceptions import ElgatoConnectionError, ElgatoError
@@ -242,6 +244,96 @@ def test_restart(runner: CliRunner) -> None:
     assert "restarting" in result.stdout
     client = mock_cls.return_value.__aenter__.return_value
     client.restart.assert_called_once()
+
+
+def _make_service_info(
+    *,
+    server: str = "elgato-key-light-1234.local.",
+    addresses: list[str] | None = None,
+    port: int = 9123,
+    properties: dict[bytes, bytes] | None = None,
+) -> MagicMock:
+    """Create a mock AsyncServiceInfo."""
+    info = MagicMock()
+    info.server = server
+    info.port = port
+    info.parsed_scoped_addresses.return_value = addresses or ["192.168.1.100"]
+    info.properties = properties or {b"md": b"Elgato Key Light"}
+    info.async_request = AsyncMock(return_value=True)
+    return info
+
+
+def _mock_zeroconf() -> tuple[MagicMock, MagicMock]:
+    """Create mock AsyncZeroconf and browser instances."""
+    mock_zc = MagicMock()
+    mock_zc.zeroconf = MagicMock()
+    mock_zc.async_close = AsyncMock()
+    mock_browser = MagicMock(async_cancel=AsyncMock())
+    return mock_zc, mock_browser
+
+
+def test_scan(runner: CliRunner) -> None:
+    """Scan command discovers and displays Elgato devices."""
+    service_info = _make_service_info()
+    mock_zc, mock_browser = _mock_zeroconf()
+
+    original_sleep = asyncio.sleep
+
+    async def interrupt_sleep(seconds: float) -> None:
+        """Let short sleeps pass, interrupt the scan loop."""
+        if seconds >= 0.5:
+            raise KeyboardInterrupt
+        await original_sleep(seconds)
+
+    def create_browser(_zc: MagicMock, _types: list[str], handlers: list) -> MagicMock:
+        handlers[0](
+            zeroconf=_zc,
+            service_type="_elg._tcp.local.",
+            name="Elgato Key Light._elg._tcp.local.",
+            state_change=ServiceStateChange.Added,
+        )
+        return mock_browser
+
+    with (
+        patch("elgato.cli.AsyncZeroconf", return_value=mock_zc),
+        patch("elgato.cli.AsyncServiceBrowser", side_effect=create_browser),
+        patch("elgato.cli.AsyncServiceInfo", return_value=service_info),
+        patch("asyncio.sleep", side_effect=interrupt_sleep),
+    ):
+        result = runner.invoke(cli, ["scan", "--quiet"])
+
+    assert result.exit_code == 0
+
+
+def test_scan_ignores_non_added_states(runner: CliRunner) -> None:
+    """Scan command ignores service state changes that are not Added."""
+    mock_zc, mock_browser = _mock_zeroconf()
+
+    original_sleep = asyncio.sleep
+
+    async def interrupt_sleep(seconds: float) -> None:
+        """Interrupt the scan loop immediately."""
+        if seconds >= 0.5:
+            raise KeyboardInterrupt
+        await original_sleep(seconds)
+
+    def create_browser(_zc: MagicMock, _types: list[str], handlers: list) -> MagicMock:
+        handlers[0](
+            zeroconf=_zc,
+            service_type="_elg._tcp.local.",
+            name="test._elg._tcp.local.",
+            state_change=ServiceStateChange.Removed,
+        )
+        return mock_browser
+
+    with (
+        patch("elgato.cli.AsyncZeroconf", return_value=mock_zc),
+        patch("elgato.cli.AsyncServiceBrowser", side_effect=create_browser),
+        patch("asyncio.sleep", side_effect=interrupt_sleep),
+    ):
+        result = runner.invoke(cli, ["scan", "--quiet"])
+
+    assert result.exit_code == 0
 
 
 def test_connection_error_handler(

@@ -8,7 +8,7 @@ dependencies (``typer``, ``rich``) are missing we raise a friendly
 
 from __future__ import annotations
 
-_CLI_EXTRA_MODULES = frozenset({"typer", "rich"})
+_CLI_EXTRA_MODULES = frozenset({"typer", "rich", "zeroconf"})
 
 
 def main() -> None:

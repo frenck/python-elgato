@@ -85,7 +85,7 @@ show_missing = true
 fail_under = 95
 omit = [
   "src/elgato/_cli.py",
-  "src/elgato/cli/*",
+  "src/elgato/cli/async_typer.py",
 ]
 
 [tool.ty.environment]
