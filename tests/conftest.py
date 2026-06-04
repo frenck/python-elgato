@@ -1,6 +1,7 @@
 """Common fixtures and helpers for Elgato Light tests."""
 
 from collections.abc import AsyncGenerator, Generator
+from inspect import signature
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -13,9 +14,9 @@ from aioresponses import core as aioresponses_core
 from elgato import Elgato
 
 AIOHTTP_REQUIRES_STREAM_WRITER = (
-    "stream_writer" in aiohttp.ClientResponse.__init__.__code__.co_varnames
+    "stream_writer" in signature(aiohttp.ClientResponse.__init__).parameters
 )
-AIOHTTP_STREAM_WRITER = SimpleNamespace(output_size=0)
+AIOHTTP_STREAM_WRITER_STUB = SimpleNamespace(output_size=0)
 
 
 class AioresponsesClientResponse(aioresponses_core.ClientResponse):
@@ -23,7 +24,8 @@ class AioresponsesClientResponse(aioresponses_core.ClientResponse):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize and provide a stream_writer for aiohttp 3.14+."""
-        kwargs.setdefault("stream_writer", AIOHTTP_STREAM_WRITER)
+        if AIOHTTP_REQUIRES_STREAM_WRITER:
+            kwargs.setdefault("stream_writer", AIOHTTP_STREAM_WRITER_STUB)
         super().__init__(*args, **kwargs)
 
 
@@ -51,8 +53,10 @@ def setup_aioresponses_aiohttp_compat() -> Generator[None, None, None]:
 
     monkeypatch = pytest.MonkeyPatch()
     monkeypatch.setattr(aioresponses_core, "ClientResponse", AioresponsesClientResponse)
-    yield
-    monkeypatch.undo()
+    try:
+        yield
+    finally:
+        monkeypatch.undo()
 
 
 @pytest.fixture
