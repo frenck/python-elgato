@@ -41,7 +41,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-cli = ["rich>=13.0.0", "typer>=0.15.1", "zeroconf>=0.149.12"]
+cli = ["rich>=13.0.0", "typer>=0.15.1", "zeroconf>=0.149.16"]
 
 [project.scripts]
 elgato = "elgato._cli:main"
@@ -72,7 +72,7 @@ safety = "3.7.0"
 syrupy = "5.1.0"
 ty = "0.0.31"
 typer = "0.24.1"
-zeroconf = {version = "0.149.12", python = ">=3.11,<4.0"}
+zeroconf = {version = "0.149.16", python = ">=3.11,<4.0"}
 yamllint = "1.38.0"
 zizmor = "1.24.1"
 
