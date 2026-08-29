@@ -19,3 +19,11 @@ class ElgatoNoBatteryError(ElgatoError):
         if not args:  # pragma: no cover
             args = ("The Elgato light does not have a battery.",)
         super().__init__(*args, **kwargs)
+
+
+class ElgatoFirmwareError(ElgatoError):
+    """Elgato Light firmware exception.
+
+    Raised for a firmware image that cannot be trusted or does not fit the
+    device, and for a device that refuses an update.
+    """

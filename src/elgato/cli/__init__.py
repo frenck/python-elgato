@@ -11,6 +11,7 @@ import typer
 from rich.console import Console
 from rich.live import Live
 from rich.panel import Panel
+from rich.progress import BarColumn, Progress, TaskProgressColumn, TextColumn
 from rich.table import Table
 from zeroconf import ServiceStateChange, Zeroconf
 from zeroconf.asyncio import (
@@ -19,6 +20,7 @@ from zeroconf.asyncio import (
     AsyncZeroconf,
 )
 
+from elgato.catalog import FirmwareCatalog
 from elgato.elgato import Elgato
 from elgato.exceptions import ElgatoConnectionError, ElgatoError
 
@@ -238,6 +240,109 @@ async def restart(
     async with Elgato(host, port=port) as elgato:
         await elgato.restart()
     console.print("[yellow]Device is restarting.[/yellow]")
+
+
+@cli.command("firmware")
+async def show_firmware(
+    host: Host,
+    port: Port = 9123,
+    output_json: JsonFlag = False,
+) -> None:
+    """Show the installed firmware, and what Elgato currently ships."""
+    async with Elgato(host, port=port) as elgato:
+        device_info = await elgato.info()
+
+    async with FirmwareCatalog() as catalog:
+        available = await catalog.latest(device_info.hardware_board_type)
+
+    installed = f"{device_info.firmware_version} ({device_info.firmware_build_number})"
+    outdated = device_info.firmware_build_number < available.build_number
+
+    if output_json:
+        emit_json(
+            {
+                "product_name": device_info.product_name,
+                "hardware_board_type": device_info.hardware_board_type,
+                "installed_version": installed,
+                "available_version": available.full_version,
+                "update_available": outdated,
+            }
+        )
+        return
+
+    table = Table(title=f"Firmware — {device_info.display_name}")
+    table.add_column("Property", style="cyan bold")
+    table.add_column("Value")
+    table.add_row("Product", device_info.product_name)
+    table.add_row("Board", f"{available.board_name} ({available.board_type})")
+    table.add_row("Installed", installed)
+    table.add_row("Available", available.full_version)
+    table.add_row(
+        "Status",
+        "[yellow bold]update available[/yellow bold]"
+        if outdated
+        else "[green]up to date[/green]",
+    )
+    console.print(table)
+
+
+@cli.command("update")
+async def update(
+    host: Host,
+    port: Port = 9123,
+    assume_yes: Annotated[
+        bool,
+        typer.Option("--yes", "-y", help="Do not ask for confirmation"),
+    ] = False,
+    force: Annotated[
+        bool,
+        typer.Option("--force", help="Install even when the device is up to date"),
+    ] = False,
+) -> None:
+    """Install the newest firmware Elgato ships for this device."""
+    async with Elgato(host, port=port) as elgato:
+        device_info = await elgato.info()
+
+        async with FirmwareCatalog() as catalog:
+            available = await catalog.latest(device_info.hardware_board_type)
+
+            installed_build = device_info.firmware_build_number
+            if installed_build >= available.build_number and not force:
+                console.print(
+                    f"[green]{device_info.product_name} already runs "
+                    f"{available.full_version}.[/green]"
+                )
+                return
+
+            console.print(
+                f"About to install [cyan bold]{available.full_version}[/cyan bold] on "
+                f"{device_info.product_name} at {host}, which currently runs "
+                f"{device_info.firmware_version} "
+                f"({device_info.firmware_build_number})."
+            )
+            if not assume_yes and not typer.confirm("Continue?"):
+                console.print("[yellow]Nothing was written to the device.[/yellow]")
+                return
+
+            image = await catalog.download(device_info.hardware_board_type)
+
+        console.print("[red]Do not remove power until the device is back.[/red]")
+        with Progress(
+            TextColumn("[cyan]Uploading[/cyan]"),
+            BarColumn(),
+            TaskProgressColumn(),
+            console=console,
+        ) as progress:
+            task = progress.add_task("upload", total=len(image.data))
+            await elgato.update_firmware(
+                image,
+                on_progress=lambda sent, _total: progress.update(task, completed=sent),
+            )
+
+    console.print(
+        "[yellow]Device is installing the firmware and restarts on its own. "
+        "This takes about a minute.[/yellow]"
+    )
 
 
 @cli.command("scan")

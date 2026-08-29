@@ -35,6 +35,7 @@ dynamic = ["dependencies"]
 packages = [{ include = "elgato", from = "src" }]
 dependencies = [
   'aiohttp (>=3.0.0)',
+  'cryptography (>=42.0.0)',
   'mashumaro (>=3.10)',
   'orjson (>=3.9.8)',
   'yarl (>=1.6.0)',

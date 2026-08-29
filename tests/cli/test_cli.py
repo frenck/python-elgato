@@ -13,6 +13,7 @@ from typer.main import get_command
 from typer.testing import CliRunner
 from zeroconf import ServiceStateChange
 
+from elgato import FirmwareImage, FirmwareVersion
 from elgato.cli import cli
 from elgato.exceptions import ElgatoConnectionError, ElgatoError
 
@@ -358,3 +359,174 @@ def test_elgato_error_handler(
         handler(ElgatoError("something went wrong"))
     assert exc_info.value.code == 1
     assert capsys.readouterr().out == snapshot
+
+
+def mock_catalog_class(
+    version: FirmwareVersion,
+    image: FirmwareImage | None = None,
+) -> MagicMock:
+    """Return a MagicMock that stands in for the FirmwareCatalog class."""
+    catalog = AsyncMock()
+    catalog.latest.return_value = version
+    catalog.download.return_value = image
+
+    instance = AsyncMock()
+    instance.__aenter__.return_value = catalog
+    instance.__aexit__.return_value = None
+
+    return MagicMock(return_value=instance)
+
+
+@pytest.fixture
+def key_light_firmware() -> FirmwareVersion:
+    """Return the firmware Elgato ships for the Key Light."""
+    return FirmwareVersion(board_type=53, build_number=222, version="1.0.3")
+
+
+def test_firmware(
+    runner: CliRunner,
+    key_light_info: dict,
+    key_light_firmware: FirmwareVersion,
+    snapshot: SnapshotAssertion,
+) -> None:
+    """Firmware command prints installed and available firmware."""
+    mock_cls = mock_elgato_class(info_data=key_light_info)
+    with (
+        patch("elgato.cli.Elgato", mock_cls),
+        patch("elgato.cli.FirmwareCatalog", mock_catalog_class(key_light_firmware)),
+    ):
+        result = runner.invoke(cli, ["firmware", "--host", "example.com"])
+
+    assert result.exit_code == 0
+    assert result.stdout == snapshot
+
+
+def test_firmware_up_to_date(
+    runner: CliRunner,
+    key_light_info: dict,
+    snapshot: SnapshotAssertion,
+) -> None:
+    """Firmware command reports a device that has nothing to install."""
+    current = FirmwareVersion(board_type=53, build_number=218, version="1.0.3")
+    mock_cls = mock_elgato_class(info_data=key_light_info)
+    with (
+        patch("elgato.cli.Elgato", mock_cls),
+        patch("elgato.cli.FirmwareCatalog", mock_catalog_class(current)),
+    ):
+        result = runner.invoke(cli, ["firmware", "--host", "example.com"])
+
+    assert result.exit_code == 0
+    assert result.stdout == snapshot
+
+
+def test_firmware_json(
+    runner: CliRunner,
+    key_light_info: dict,
+    key_light_firmware: FirmwareVersion,
+    snapshot: SnapshotAssertion,
+) -> None:
+    """Firmware command emits JSON on request."""
+    mock_cls = mock_elgato_class(info_data=key_light_info)
+    with (
+        patch("elgato.cli.Elgato", mock_cls),
+        patch("elgato.cli.FirmwareCatalog", mock_catalog_class(key_light_firmware)),
+    ):
+        result = runner.invoke(cli, ["firmware", "--host", "example.com", "--json"])
+
+    assert result.exit_code == 0
+    assert result.stdout == snapshot
+
+
+def _mock_update(info_data: dict) -> tuple[MagicMock, AsyncMock]:
+    """Return an Elgato class mock whose update reports progress."""
+    mock_cls = mock_elgato_class(info_data=info_data)
+    client = mock_cls.return_value.__aenter__.return_value
+
+    async def install(image: FirmwareImage, *, on_progress: object = None) -> None:
+        """Stand in for a device taking a firmware image."""
+        if callable(on_progress):
+            on_progress(len(image.data), len(image.data))
+
+    client.update_firmware.side_effect = install
+    return mock_cls, client
+
+
+def test_update(
+    runner: CliRunner,
+    key_light_info: dict,
+    key_light_firmware: FirmwareVersion,
+) -> None:
+    """Update command installs the firmware Elgato ships."""
+    image = FirmwareImage(
+        board_type=53, build_number=222, version="1.0.3", data=b"\x00" * 8192
+    )
+    mock_cls, client = _mock_update(key_light_info)
+    with (
+        patch("elgato.cli.Elgato", mock_cls),
+        patch(
+            "elgato.cli.FirmwareCatalog",
+            mock_catalog_class(key_light_firmware, image),
+        ),
+    ):
+        result = runner.invoke(cli, ["update", "--host", "example.com", "--yes"])
+
+    assert result.exit_code == 0
+    assert client.update_firmware.call_args.args[0] is image
+
+
+def test_update_declined(
+    runner: CliRunner,
+    key_light_info: dict,
+    key_light_firmware: FirmwareVersion,
+) -> None:
+    """Update command writes nothing when the confirmation is declined."""
+    mock_cls, client = _mock_update(key_light_info)
+    with (
+        patch("elgato.cli.Elgato", mock_cls),
+        patch("elgato.cli.FirmwareCatalog", mock_catalog_class(key_light_firmware)),
+    ):
+        result = runner.invoke(cli, ["update", "--host", "example.com"], input="n\n")
+
+    assert result.exit_code == 0
+    assert "Nothing was written" in result.stdout
+    client.update_firmware.assert_not_called()
+
+
+def test_update_already_current(
+    runner: CliRunner,
+    key_light_info: dict,
+) -> None:
+    """Update command leaves a device that is already current alone."""
+    current = FirmwareVersion(board_type=53, build_number=218, version="1.0.3")
+    mock_cls, client = _mock_update(key_light_info)
+    with (
+        patch("elgato.cli.Elgato", mock_cls),
+        patch("elgato.cli.FirmwareCatalog", mock_catalog_class(current)),
+    ):
+        result = runner.invoke(cli, ["update", "--host", "example.com"])
+
+    assert result.exit_code == 0
+    assert "already runs 1.0.3 (218)" in result.stdout
+    client.update_firmware.assert_not_called()
+
+
+def test_update_forced(
+    runner: CliRunner,
+    key_light_info: dict,
+) -> None:
+    """Update command reinstalls the current firmware when forced."""
+    current = FirmwareVersion(board_type=53, build_number=218, version="1.0.3")
+    image = FirmwareImage(
+        board_type=53, build_number=218, version="1.0.3", data=b"\x00" * 4096
+    )
+    mock_cls, client = _mock_update(key_light_info)
+    with (
+        patch("elgato.cli.Elgato", mock_cls),
+        patch("elgato.cli.FirmwareCatalog", mock_catalog_class(current, image)),
+    ):
+        result = runner.invoke(
+            cli, ["update", "--host", "example.com", "--yes", "--force"]
+        )
+
+    assert result.exit_code == 0
+    client.update_firmware.assert_called_once()

@@ -3,7 +3,7 @@
 # pylint: disable=protected-access
 
 import pytest
-from aiohttp import ClientSession
+from aiohttp import ClientError, ClientSession
 from aioresponses import aioresponses
 
 from elgato import Elgato
@@ -143,3 +143,15 @@ async def test_light_no_on_off(responses: aioresponses) -> None:
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
         await elgato.light(brightness=50)
+
+
+async def test_client_error(responses: aioresponses) -> None:
+    """Test a connection that never gets off the ground."""
+    responses.get(
+        "http://example.com:9123/elgato/test",
+        exception=ClientError(),
+    )
+    async with ClientSession() as session:
+        elgato = Elgato("example.com", session=session)
+        with pytest.raises(ElgatoConnectionError):
+            await elgato._request("test")
