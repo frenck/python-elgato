@@ -147,8 +147,8 @@ class Elgato:
         status, response = await self._raw_request(uri, method=method, data=data)
 
         if status >= HTTPStatus.BAD_REQUEST:
-            msg = "Error occurred while communicating with Elgato Light device"
-            raise ElgatoConnectionError(msg)
+            msg = f"Elgato Light device returned HTTP {status}: {response}"
+            raise ElgatoError(msg)
 
         return response
 
