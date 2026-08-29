@@ -291,3 +291,27 @@ async def test_provided_session(responses: aioresponses, archive: bytes) -> None
         await catalog.close()
 
         assert not session.closed
+
+
+async def test_server_ignores_ranges(responses: aioresponses, archive: bytes) -> None:
+    """Test a server that answers a range request with the whole archive.
+
+    Every offset after the first would read the wrong bytes, so this has to
+    fail loudly rather than parse whatever it got.
+    """
+    responses.get(
+        CATALOG_URL,
+        status=200,
+        body=DEFAULT_CATALOG,
+        content_type="application/json",
+    )
+    responses.head(
+        ARCHIVE_URL,
+        status=200,
+        headers={"Content-Length": str(len(archive))},
+    )
+    responses.get(ARCHIVE_URL, status=200, body=archive, repeat=True)
+
+    async with FirmwareCatalog() as catalog:
+        with pytest.raises(ElgatoFirmwareError, match="without byte ranges"):
+            await catalog.versions()

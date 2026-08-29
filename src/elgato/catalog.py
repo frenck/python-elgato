@@ -20,6 +20,7 @@ import socket
 import struct
 import zlib
 from dataclasses import dataclass, field
+from http import HTTPStatus
 from typing import TYPE_CHECKING, Self
 
 import orjson
@@ -212,7 +213,7 @@ class FirmwareCatalog:
 
     async def _published_archive(self) -> str:
         """Find the Control Center release Elgato currently publishes."""
-        _, body = await self._request(CATALOG_URL)
+        _, _, body = await self._request(CATALOG_URL)
 
         try:
             # pylint: disable-next=no-member
@@ -224,7 +225,7 @@ class FirmwareCatalog:
 
     async def _read_index(self) -> None:
         """Read the archive index and the firmware header of every image."""
-        headers, _ = await self._request(self._archive_url, method=METH_HEAD)
+        _, headers, _ = await self._request(self._archive_url, method=METH_HEAD)
         self._archive_size = int(headers["Content-Length"])
 
         tail_size = min(self._archive_size, EOCD_MAX_SIZE)
@@ -254,12 +255,37 @@ class FirmwareCatalog:
         )
 
     async def _read(self, start: int, length: int) -> bytes:
-        """Read a byte range out of the Control Center archive."""
+        """Read a byte range out of the Control Center archive.
+
+        Args:
+        ----
+            start: Offset of the first byte wanted.
+            length: How many bytes to read.
+
+        Returns:
+        -------
+            Exactly the bytes that were asked for.
+
+        Raises:
+        ------
+            ElgatoFirmwareError: The server ignored the range and sent
+                something other than the slice that was asked for.
+
+        """
         end = start + length - 1
-        _, body = await self._request(
+        status, _, body = await self._request(
             self._archive_url,
             headers={"Range": f"bytes={start}-{end}"},
         )
+
+        # A server that ignores Range answers 200 with the whole archive.
+        # Every offset after this one would then read the wrong bytes, and
+        # the sixteen megabytes this is built to avoid arrive anyway. Say so
+        # rather than quietly parse nonsense.
+        if status != HTTPStatus.PARTIAL_CONTENT:
+            msg = "Elgato served the Control Center archive without byte ranges"
+            raise ElgatoFirmwareError(msg)
+
         return body
 
     async def _request(
@@ -268,7 +294,7 @@ class FirmwareCatalog:
         *,
         method: str = METH_GET,
         headers: dict[str, str] | None = None,
-    ) -> tuple[CIMultiDictProxy[str], bytes]:
+    ) -> tuple[int, CIMultiDictProxy[str], bytes]:
         """Handle a request to Elgato's servers.
 
         Args:
@@ -279,7 +305,7 @@ class FirmwareCatalog:
 
         Returns:
         -------
-            The response headers and body.
+            The response status, headers and body.
 
         Raises:
         ------
@@ -306,7 +332,7 @@ class FirmwareCatalog:
             msg = "Error occurred while communicating with Elgato"
             raise ElgatoConnectionError(msg) from exception
 
-        return response.headers, body
+        return response.status, response.headers, body
 
     async def close(self) -> None:
         """Close open client session."""
