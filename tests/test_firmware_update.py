@@ -2,6 +2,7 @@
 
 import re
 from collections.abc import Callable
+from typing import Any
 
 import pytest
 from aioresponses import CallbackResult, aioresponses
@@ -50,9 +51,9 @@ async def test_update_firmware(
     chunks: list[tuple[int, bytes]] = []
     progress: list[tuple[int, int]] = []
 
-    def collect(url: str, **kwargs: object) -> CallbackResult:
+    def collect(url: str, **kwargs: Any) -> CallbackResult:
         offset = int(str(url).rpartition("=")[2])
-        chunks.append((offset, bytes(kwargs["data"])))  # type: ignore[arg-type]
+        chunks.append((offset, bytes(kwargs["data"])))
         sent = offset + len(chunks[-1][1])
         return CallbackResult(status=200 if sent == len(image.data) else 202)
 

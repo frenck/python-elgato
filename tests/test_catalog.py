@@ -3,6 +3,7 @@
 import io
 import zipfile
 from collections.abc import Callable
+from typing import Any
 
 import pytest
 from aiohttp import ClientSession
@@ -45,8 +46,8 @@ def mock_elgato(
     """
     served: list[str] = []
 
-    def serve(_url: str, **kwargs: object) -> CallbackResult:
-        headers: dict[str, str] = kwargs["headers"]  # type: ignore[assignment]
+    def serve(_url: str, **kwargs: Any) -> CallbackResult:
+        headers: dict[str, str] = kwargs["headers"]
         served.append(headers["Range"])
         start, _, end = headers["Range"].removeprefix("bytes=").partition("-")
         return CallbackResult(status=206, body=archive[int(start) : int(end) + 1])

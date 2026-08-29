@@ -18,6 +18,8 @@ from elgato.cli import cli
 from elgato.exceptions import ElgatoConnectionError, ElgatoError
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from syrupy.assertion import SnapshotAssertion
 
 
@@ -442,9 +444,13 @@ def _mock_update(info_data: dict) -> tuple[MagicMock, AsyncMock]:
     mock_cls = mock_elgato_class(info_data=info_data)
     client = mock_cls.return_value.__aenter__.return_value
 
-    async def install(image: FirmwareImage, *, on_progress: object = None) -> None:
+    async def install(
+        image: FirmwareImage,
+        *,
+        on_progress: Callable[[int, int], None] | None = None,
+    ) -> None:
         """Stand in for a device taking a firmware image."""
-        if callable(on_progress):
+        if on_progress is not None:
             on_progress(len(image.data), len(image.data))
 
     client.update_firmware.side_effect = install
