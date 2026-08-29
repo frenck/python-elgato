@@ -1,5 +1,7 @@
 """Tests for the firmware Elgato ships with Control Center."""
 
+# pylint: disable=redefined-outer-name
+
 import io
 import zipfile
 from collections.abc import Callable
@@ -15,7 +17,9 @@ from elgato.exceptions import ElgatoConnectionError, ElgatoFirmwareError
 
 ARCHIVE_URL = "https://edge.elgato.com/egc/macos/eccm/1.9/ControlCenter.app.zip"
 RESOURCES = "Elgato Control Center.app/Contents/Resources/"
+NEXT_ARCHIVE_URL = "https://edge.elgato.com/egc/macos/eccm/2.0/ControlCenter.app.zip"
 DEFAULT_CATALOG = f'{{"cc-mac": {{"downloadURL": "{ARCHIVE_URL}"}}}}'
+NEXT_CATALOG = f'{{"cc-mac": {{"downloadURL": "{NEXT_ARCHIVE_URL}"}}}}'
 
 
 def build_archive(
@@ -36,6 +40,8 @@ def mock_elgato(
     archive: bytes,
     *,
     catalog: str | None = None,
+    url: str = ARCHIVE_URL,
+    repeat: bool = True,
 ) -> list[str]:
     """Serve a Control Center archive, byte ranges and all.
 
@@ -57,15 +63,15 @@ def mock_elgato(
         status=200,
         body=catalog if catalog is not None else DEFAULT_CATALOG,
         content_type="application/json",
-        repeat=True,
+        repeat=repeat,
     )
     responses.head(
-        ARCHIVE_URL,
+        url,
         status=200,
         headers={"Content-Length": str(len(archive))},
         repeat=True,
     )
-    responses.get(ARCHIVE_URL, callback=serve, repeat=True)
+    responses.get(url, callback=serve, repeat=True)
 
     return served
 
@@ -104,18 +110,58 @@ async def test_versions(responses: aioresponses, archive: bytes) -> None:
 
 
 async def test_versions_are_cached(responses: aioresponses, archive: bytes) -> None:
-    """Test the catalog only reads Elgato's servers once."""
+    """Test the catalog reads the archive once and then leaves Elgato alone."""
     served = mock_elgato(responses, archive)
 
     async with FirmwareCatalog() as catalog:
         await catalog.versions()
         reads = len(served)
-        await catalog.versions()
+        assert reads
 
+        await catalog.versions()
         assert len(served) == reads
 
+
+async def test_refresh_without_a_new_release(
+    responses: aioresponses,
+    archive: bytes,
+) -> None:
+    """Test a refresh stops at the release index while nothing has changed.
+
+    This is the case a daily check hits on all but a handful of days a year,
+    so it must not walk the archive again.
+    """
+    served = mock_elgato(responses, archive)
+
+    async with FirmwareCatalog() as catalog:
+        versions = await catalog.versions()
+        reads = len(served)
+
+        assert await catalog.versions(refresh=True) == versions
+        assert len(served) == reads
+
+
+async def test_refresh_with_a_new_release(
+    responses: aioresponses,
+    archive: bytes,
+    make_firmware: Callable[..., bytes],
+) -> None:
+    """Test a refresh picks up a Control Center that ships newer firmware."""
+    newer = build_archive(
+        {
+            f"{RESOURCES}Firmware_Ring_Light.bin": make_firmware(
+                board_type=201, build_number=160, version=(1, 0, 5)
+            )
+        }
+    )
+    mock_elgato(responses, archive, catalog=DEFAULT_CATALOG, repeat=False)
+    mock_elgato(responses, newer, catalog=NEXT_CATALOG, url=NEXT_ARCHIVE_URL)
+
+    async with FirmwareCatalog() as catalog:
+        assert (await catalog.latest(201)).full_version == "1.0.4 (151)"
+
         await catalog.versions(refresh=True)
-        assert len(served) == reads * 2
+        assert (await catalog.latest(201)).full_version == "1.0.5 (160)"
 
 
 async def test_latest(responses: aioresponses, archive: bytes) -> None:

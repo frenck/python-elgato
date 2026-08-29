@@ -6,9 +6,11 @@ Center release. The macOS build is a plain zip archive, so the images can be
 read straight out of it.
 
 Reading the whole archive to answer "is there anything newer" would be
-wasteful, so this walks the archive over HTTP range requests instead. Listing
-every version costs around a hundred kilobytes, and pulling a single image
-about a megabyte, against an archive of sixteen.
+wasteful, so this walks it over HTTP range requests instead. Against an
+archive of sixteen megabytes, reading the versions of every model costs about
+two hundred kilobytes and pulling one image about six hundred. Checking
+whether any of that changed costs twelve, which is the number that matters:
+it is the one a poller pays.
 """
 
 from __future__ import annotations
@@ -131,25 +133,30 @@ class FirmwareCatalog:
     async def versions(self, *, refresh: bool = False) -> dict[int, FirmwareVersion]:
         """Get the newest firmware Elgato ships, per board type.
 
-        The result is cached. Elgato only publishes new firmware alongside a
-        new Control Center release, so there is little point in asking twice.
+        The result is cached, so asking twice is free. A refresh re-reads the
+        small release index Elgato publishes and only walks the archive again
+        when Elgato has actually shipped a new Control Center. On every other
+        day that is a single request of about twelve kilobytes, which is what
+        makes a daily check practical.
 
         Args:
         ----
-            refresh: Discard the cache and read the catalog again.
+            refresh: Check whether Elgato published a new Control Center.
 
         Returns:
         -------
             A dictionary of board type to the newest FirmwareVersion for it.
 
         """
-        if refresh:
-            self._archive_url = ""
+        if self._versions and not refresh:
+            return dict(self._versions)
+
+        published = await self._published_archive()
+
+        if published != self._archive_url or not self._versions:
+            self._archive_url = published
             self._members = {}
             self._versions = {}
-
-        if not self._versions:
-            await self._resolve_archive()
             await self._read_index()
 
         return dict(self._versions)
@@ -203,23 +210,23 @@ class FirmwareCatalog:
 
         return FirmwareImage.from_bytes(_decompress(compressed, member.compression))
 
-    async def _resolve_archive(self) -> None:
+    async def _published_archive(self) -> str:
         """Find the Control Center release Elgato currently publishes."""
         _, body = await self._request(CATALOG_URL)
 
         try:
             # pylint: disable-next=no-member
-            self._archive_url = str(orjson.loads(body)[CATALOG_PRODUCT]["downloadURL"])
+            return str(orjson.loads(body)[CATALOG_PRODUCT]["downloadURL"])
         # pylint: disable-next=no-member
         except (orjson.JSONDecodeError, KeyError, TypeError) as exception:
             msg = "Elgato published no Control Center release to read firmware from"
             raise ElgatoFirmwareError(msg) from exception
 
+    async def _read_index(self) -> None:
+        """Read the archive index and the firmware header of every image."""
         headers, _ = await self._request(self._archive_url, method=METH_HEAD)
         self._archive_size = int(headers["Content-Length"])
 
-    async def _read_index(self) -> None:
-        """Read the archive index and the firmware header of every image."""
         tail_size = min(self._archive_size, EOCD_MAX_SIZE)
         tail = await self._read(self._archive_size - tail_size, tail_size)
 

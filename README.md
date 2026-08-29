@@ -165,8 +165,22 @@ async with Elgato("elgato-key-light.local") as elgato:
 Elgato runs no firmware download service. Every image ships inside the Control
 Center application, and new firmware only arrives with a new Control Center
 release. `FirmwareCatalog` reads those images straight out of the archive
-Elgato publishes, over HTTP range requests, so listing every version costs
-around a hundred kilobytes rather than the full sixteen megabytes.
+Elgato publishes, using HTTP range requests rather than downloading all
+sixteen megabytes of it.
+
+Results are cached, and a `refresh` stops at the small release index unless
+Elgato actually shipped a new Control Center, so polling on a slow cadence is
+cheap:
+
+| Call                                  | Requests | Bytes   |
+| ------------------------------------- | -------- | ------- |
+| `versions()`, first time              | 13       | ~210 KB |
+| `versions()`, again                   | 0        | 0       |
+| `versions(refresh=True)`, nothing new | 1        | ~12 KB  |
+| `download()`, when installing         | 2        | ~600 KB |
+
+Refresh once a day. Elgato publishes new firmware a few times a year, and
+nothing else needs to talk to their servers.
 
 ```python
 from elgato import Elgato, FirmwareCatalog
