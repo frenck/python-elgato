@@ -78,7 +78,9 @@ zizmor = "1.24.1"
 
 [tool.coverage.run]
 plugins = ["covdefaults"]
-source = ["elgato"]
+# Not "source"; coverage cannot resolve a bare package name in a src layout,
+# so it measured nothing and covdefaults fell back to the working directory.
+source_pkgs = ["elgato"]
 
 [tool.coverage.report]
 show_missing = true
@@ -86,6 +88,7 @@ fail_under = 95
 omit = [
   "src/elgato/_cli.py",
   "src/elgato/cli/async_typer.py",
+  "tests/*",
 ]
 
 [tool.ty.environment]
@@ -110,7 +113,7 @@ ignore-imports = true
 max-line-length = 88
 
 [tool.pytest.ini_options]
-addopts = "--cov"
+addopts = "--cov=elgato"
 asyncio_mode = "auto"
 
 [tool.ruff.lint]
