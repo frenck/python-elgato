@@ -92,3 +92,19 @@ async def test_tampered_payload(make_firmware: Callable[..., bytes]) -> None:
 
     with pytest.raises(ElgatoFirmwareError, match="signature is invalid"):
         FirmwareImage.from_bytes(bytes(data))
+
+
+async def test_payload_offset(make_firmware: Callable[..., bytes]) -> None:
+    """Test rejecting an image whose payload does not follow the header.
+
+    A device reads a fixed header, so a different offset would mean verifying
+    a signature over bytes it never hashes.
+    """
+    with pytest.raises(ElgatoFirmwareError, match="starts at 256"):
+        FirmwareImage.from_bytes(make_firmware(payload_offset=256))
+
+
+async def test_reserved_field(make_firmware: Callable[..., bytes]) -> None:
+    """Test rejecting an image with a reserved field the device refuses."""
+    with pytest.raises(ElgatoFirmwareError, match="non-zero reserved field"):
+        FirmwareImage.from_bytes(make_firmware(reserved=1))

@@ -154,7 +154,18 @@ class FirmwareImage(FirmwareVersion):
         header = FirmwareVersion.from_header(data)
 
         (payload_size,) = struct.unpack_from("<I", data, 54)
-        payload_offset, _reserved, signing_key_id = struct.unpack_from("<HHH", data, 58)
+        payload_offset, reserved, signing_key_id = struct.unpack_from("<HHH", data, 58)
+
+        # A device reads a fixed header and rejects a non-zero reserved field.
+        # Accepting either here would mean verifying a signature over bytes the
+        # device never hashes, which is worse than not checking at all.
+        if payload_offset != HEADER_SIZE:
+            msg = f"Firmware payload starts at {payload_offset}, expected {HEADER_SIZE}"
+            raise ElgatoFirmwareError(msg)
+
+        if reserved:
+            msg = f"Firmware has a non-zero reserved field ({reserved})"
+            raise ElgatoFirmwareError(msg)
 
         if payload_offset + payload_size != len(data):
             msg = (

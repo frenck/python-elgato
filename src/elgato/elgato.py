@@ -206,14 +206,16 @@ class Elgato:
             self._close_session = True
 
         try:
-            async with asyncio.timeout(request_timeout or self.request_timeout):
-                response = await self.session.request(
+            async with (
+                asyncio.timeout(request_timeout or self.request_timeout),
+                self.session.request(
                     method,
                     url,
                     data=content,
                     json=data if content is None else None,
                     headers=headers,
-                )
+                ) as response,
+            ):
                 return response.status, await response.text()
         except TimeoutError as exception:
             msg = "Timeout occurred while connecting to Elgato Light device"

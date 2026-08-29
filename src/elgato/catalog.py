@@ -205,7 +205,7 @@ class FirmwareCatalog:
         await self.latest(board_type)
         member = self._members[board_type]
 
-        window = await self._read(member.header_offset, LOCAL_HEADER_WINDOW)
+        window = await self._read_local_header(member)
         data_offset = member.header_offset + _local_data_offset(window)
         compressed = await self._read(data_offset, member.compressed_size)
 
@@ -247,12 +247,22 @@ class FirmwareCatalog:
 
     async def _read_header(self, member: _ArchiveMember) -> bytes:
         """Read the firmware header out of an image in the archive."""
-        window = await self._read(member.header_offset, LOCAL_HEADER_WINDOW)
+        window = await self._read_local_header(member)
         return _decompress(
             window[_local_data_offset(window) :],
             member.compression,
             limit=HEADER_SIZE,
         )
+
+    async def _read_local_header(self, member: _ArchiveMember) -> bytes:
+        """Read the start of a member, local file header and all.
+
+        The window is a guess at how much compressed data is worth having in
+        hand, so it is trimmed to what is left of the archive. A member near
+        the end has less than a full window behind it.
+        """
+        window = min(LOCAL_HEADER_WINDOW, self._archive_size - member.header_offset)
+        return await self._read(member.header_offset, window)
 
     async def _read(self, start: int, length: int) -> bytes:
         """Read a byte range out of the Control Center archive.
@@ -268,8 +278,8 @@ class FirmwareCatalog:
 
         Raises:
         ------
-            ElgatoFirmwareError: The server ignored the range and sent
-                something other than the slice that was asked for.
+            ElgatoFirmwareError: The server sent something other than the
+                slice that was asked for.
 
         """
         end = start + length - 1
@@ -284,6 +294,15 @@ class FirmwareCatalog:
         # rather than quietly parse nonsense.
         if status != HTTPStatus.PARTIAL_CONTENT:
             msg = "Elgato served the Control Center archive without byte ranges"
+            raise ElgatoFirmwareError(msg)
+
+        # A short range is just as misleading as no range. Callers ask for
+        # what they know is there and index straight into the result.
+        if len(body) != length:
+            msg = (
+                f"Elgato served {len(body)} bytes of the Control Center "
+                f"archive where {length} were asked for"
+            )
             raise ElgatoFirmwareError(msg)
 
         return body

@@ -315,3 +315,36 @@ async def test_server_ignores_ranges(responses: aioresponses, archive: bytes) ->
     async with FirmwareCatalog() as catalog:
         with pytest.raises(ElgatoFirmwareError, match="without byte ranges"):
             await catalog.versions()
+
+
+async def test_server_truncates_a_range(
+    responses: aioresponses,
+    archive: bytes,
+) -> None:
+    """Test a range that comes back short of what was asked for.
+
+    The status says 206, so only the length gives it away. Callers index
+    straight into the result, so a short read has to stop here.
+    """
+
+    def serve_short(_url: str, **kwargs: Any) -> CallbackResult:
+        headers: dict[str, str] = kwargs["headers"]
+        start, _, end = headers["Range"].removeprefix("bytes=").partition("-")
+        return CallbackResult(status=206, body=archive[int(start) : int(end)])
+
+    responses.get(
+        CATALOG_URL,
+        status=200,
+        body=DEFAULT_CATALOG,
+        content_type="application/json",
+    )
+    responses.head(
+        ARCHIVE_URL,
+        status=200,
+        headers={"Content-Length": str(len(archive))},
+    )
+    responses.get(ARCHIVE_URL, callback=serve_short, repeat=True)
+
+    async with FirmwareCatalog() as catalog:
+        with pytest.raises(ElgatoFirmwareError, match=r"where \d+ were asked for"):
+            await catalog.versions()

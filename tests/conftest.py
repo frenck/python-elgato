@@ -95,6 +95,8 @@ def make_firmware(monkeypatch: pytest.MonkeyPatch) -> Callable[..., bytes]:
         header_version: int = firmware_module.HEADER_VERSION,
         identifier: bytes = firmware_module.HEADER_IDENTIFIER,
         payload_size: int | None = None,
+        payload_offset: int = firmware_module.HEADER_SIZE,
+        reserved: int = 0,
         signing_key_id: int = TEST_SIGNING_KEY_ID,
         signed: bool = True,
     ) -> bytes:
@@ -107,9 +109,7 @@ def make_firmware(monkeypatch: pytest.MonkeyPatch) -> Callable[..., bytes]:
         struct.pack_into(
             "<I", header, 54, len(payload) if payload_size is None else payload_size
         )
-        struct.pack_into(
-            "<HHH", header, 58, firmware_module.HEADER_SIZE, 0, signing_key_id
-        )
+        struct.pack_into("<HHH", header, 58, payload_offset, reserved, signing_key_id)
 
         digest = hashlib.sha512(bytes(header[:64]) + payload).digest()
         header[64:128] = private_key.sign(digest) if signed else bytes(64)
