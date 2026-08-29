@@ -66,6 +66,12 @@ elgato identify --host elgato-key-light.local
 # Restart the device
 elgato restart --host elgato-key-light.local
 
+# Compare the installed firmware against what Elgato ships
+elgato firmware --host elgato-key-light.local
+
+# Install the newest firmware Elgato ships for this device
+elgato update --host elgato-key-light.local
+
 # Emit machine-readable JSON
 elgato state --host elgato-key-light.local --json
 
@@ -152,6 +158,59 @@ async with Elgato("elgato-key-light.local") as elgato:
 
     # Reboot the device
     await elgato.restart()
+```
+
+### Firmware updates
+
+Elgato runs no firmware download service. Every image ships inside the Control
+Center application, and new firmware only arrives with a new Control Center
+release. `FirmwareCatalog` reads those images straight out of the archive
+Elgato publishes, using HTTP range requests rather than downloading all
+sixteen megabytes of it.
+
+Results are cached, and a `refresh` stops at the small release index unless
+Elgato actually shipped a new Control Center, so polling on a slow cadence is
+cheap:
+
+| Call                                  | Requests | Bytes   |
+| ------------------------------------- | -------- | ------- |
+| `versions()`, first time              | 13       | ~210 KB |
+| `versions()`, again                   | 0        | 0       |
+| `versions(refresh=True)`, nothing new | 1        | ~12 KB  |
+| `download()`, when installing         | 2        | ~600 KB |
+
+Refresh once a day. Elgato publishes new firmware a few times a year, and
+nothing else needs to talk to their servers.
+
+```python
+from elgato import Elgato, FirmwareCatalog
+
+async with Elgato("elgato-key-light.local") as elgato:
+    info = await elgato.info()
+
+    async with FirmwareCatalog() as catalog:
+        available = await catalog.latest(info.hardware_board_type)
+        print(f"installed {info.firmware_build_number}, available {available.full_version}")
+
+        if available.build_number > info.firmware_build_number:
+            image = await catalog.download(info.hardware_board_type)
+            await elgato.update_firmware(image)
+```
+
+Every image is verified against Elgato's Ed25519 signing key before a single
+byte reaches the device, and `update_firmware()` refuses an image built for a
+different board. The device holds two firmware slots and keeps running the old
+one until the final step, so an upload that fails leaves a working light.
+`update_firmware()` returns as soon as the device accepts the reboot; coming
+back takes it about a minute.
+
+Pass `on_progress` to follow along:
+
+```python
+await elgato.update_firmware(
+    image,
+    on_progress=lambda sent, total: print(f"{sent / total:.0%}"),
+)
 ```
 
 ### Power-on behavior

@@ -1,6 +1,11 @@
 # serializer version: 1
 # name: test_cli_structure
   dict({
+    'firmware': list([
+      'host',
+      'output_json',
+      'port',
+    ]),
     'identify': list([
       'host',
       'port',
@@ -32,6 +37,12 @@
       'output_json',
       'port',
     ]),
+    'update': list([
+      'assume_yes',
+      'force',
+      'host',
+      'port',
+    ]),
   })
 # ---
 # name: test_connection_error_handler
@@ -51,6 +62,48 @@
   ╭──── Elgato error ────╮
   │ something went wrong │
   ╰──────────────────────╯
+  
+  '''
+# ---
+# name: test_firmware
+  '''
+            Firmware — Frenck          
+  ┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┓
+  ┃ Property  ┃ Value                 ┃
+  ┡━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━┩
+  │ Product   │ Elgato Key Light      │
+  │ Board     │ Elgato Key Light (53) │
+  │ Installed │ 1.0.3 (218)           │
+  │ Available │ 1.0.3 (222)           │
+  │ Status    │ update available      │
+  └───────────┴───────────────────────┘
+  
+  '''
+# ---
+# name: test_firmware_json
+  '''
+  {
+    "product_name": "Elgato Key Light",
+    "hardware_board_type": 53,
+    "installed_version": "1.0.3 (218)",
+    "available_version": "1.0.3 (222)",
+    "update_available": true
+  }
+  
+  '''
+# ---
+# name: test_firmware_up_to_date
+  '''
+            Firmware — Frenck          
+  ┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┓
+  ┃ Property  ┃ Value                 ┃
+  ┡━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━┩
+  │ Product   │ Elgato Key Light      │
+  │ Board     │ Elgato Key Light (53) │
+  │ Installed │ 1.0.3 (218)           │
+  │ Available │ 1.0.3 (218)           │
+  │ Status    │ up to date            │
+  └───────────┴───────────────────────┘
   
   '''
 # ---
