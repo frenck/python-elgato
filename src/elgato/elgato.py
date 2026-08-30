@@ -511,9 +511,9 @@ class Elgato:
     ) -> None:
         """Change how long the Elgato Light device takes to change state.
 
-        The device does not check these values. It answers 200 to a negative
-        number and to a string alike, and quietly stores a 0, so anything
-        unreasonable is turned away here instead.
+        A negative duration is refused here, because the device will not
+        refuse it: it answers 200 and quietly stores a zero, so nothing
+        downstream would ever report it.
 
         Args:
         ----
