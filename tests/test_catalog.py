@@ -1,11 +1,13 @@
 """Tests for the firmware Elgato ships with Control Center."""
 
-# pylint: disable=redefined-outer-name
+# pylint: disable=protected-access,redefined-outer-name
 
+import asyncio
 import io
 import zipfile
 from collections.abc import Callable
 from typing import Any
+from unittest.mock import patch
 
 import pytest
 from aiohttp import ClientSession
@@ -348,3 +350,62 @@ async def test_server_truncates_a_range(
     async with FirmwareCatalog() as catalog:
         with pytest.raises(ElgatoFirmwareError, match=r"where \d+ were asked for"):
             await catalog.versions()
+
+
+async def test_refresh_during_a_download(
+    responses: aioresponses,
+    make_firmware: Callable[..., bytes],
+) -> None:
+    """Test Elgato publishing a new release while an image is downloading.
+
+    A download reads the archive in pieces. If a refresh swaps the archive
+    out between two of them, the later pieces come from a different file at
+    offsets that belong to the old one.
+    """
+    firmware = make_firmware(board_type=53, build_number=222, version=(1, 0, 3))
+    first = build_archive({f"{RESOURCES}Firmware_Key_Light.bin": firmware})
+    # Padding ahead of it, so the same member sits somewhere else entirely.
+    second = build_archive(
+        {
+            f"{RESOURCES}Notes.txt": b"n" * 40_000,
+            f"{RESOURCES}Firmware_Key_Light.bin": firmware,
+        }
+    )
+
+    async with FirmwareCatalog() as catalog:
+        served = mock_elgato(responses, first, catalog=DEFAULT_CATALOG, repeat=False)
+        await catalog.versions()
+
+        mock_elgato(responses, second, catalog=NEXT_CATALOG, url=NEXT_ARCHIVE_URL)
+        refresh: asyncio.Task[Any] | None = None
+
+        original_read = catalog._read
+
+        async def read_and_meddle(start: int, length: int) -> bytes:
+            """Let Elgato publish a new release mid download, once."""
+            nonlocal refresh
+            if refresh is None:
+                refresh = asyncio.create_task(catalog.versions(refresh=True))
+                await asyncio.sleep(0)
+            return await original_read(start, length)
+
+        with patch.object(catalog, "_read", read_and_meddle):
+            image = await catalog.download(53)
+
+        assert refresh is not None
+        await refresh
+
+        assert image.data == firmware
+        assert served
+
+
+async def test_download_for_a_board_elgato_skips(
+    responses: aioresponses,
+    archive: bytes,
+) -> None:
+    """Test asking for an image Elgato does not publish."""
+    mock_elgato(responses, archive)
+
+    async with FirmwareCatalog() as catalog:
+        with pytest.raises(ElgatoFirmwareError, match="board type 70"):
+            await catalog.download(70)
