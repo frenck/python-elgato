@@ -117,6 +117,7 @@ class Wifi(BaseModel):
     ----------
         frequency: The frequency in MHz of the Wi-Fi network connected.
         rssi: The signal strength in dBm of the Wi-Fi network connected.
+        signal_strength: The signal strength as a percentage.
         ssid: The SSID of the Wi-Fi network the device is connected to.
 
     """
@@ -124,6 +125,15 @@ class Wifi(BaseModel):
     frequency: int = field(metadata=field_options(alias="frequencyMHz"))
     rssi: int
     ssid: str
+
+    @property
+    def signal_strength(self) -> int:
+        """Convert RSSI to signal strength percentage (0-100)."""
+        if self.rssi <= -100:
+            return 0
+        if self.rssi >= -50:
+            return 100
+        return 2 * (self.rssi + 100)
 
 
 class PowerSource(IntEnum):

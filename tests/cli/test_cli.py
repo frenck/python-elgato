@@ -13,7 +13,7 @@ from typer.main import get_command
 from typer.testing import CliRunner
 from zeroconf import ServiceStateChange
 
-from elgato import FirmwareImage, FirmwareVersion
+from elgato import FirmwareImage, FirmwareVersion, Wifi
 from elgato.cli import cli
 from elgato.exceptions import ElgatoConnectionError, ElgatoError
 
@@ -67,10 +67,8 @@ def mock_elgato_class(
 @pytest.fixture
 def key_light_info() -> dict:
     """Return sample Key Light device info."""
-    wifi = MagicMock()
-    wifi.ssid = "Frenck-IoT"
-    wifi.rssi = -48
-    wifi.frequency = 2400
+    # The real model, so the signal strength percentage is actually computed.
+    wifi = Wifi(frequency=2400, rssi=-48, ssid="Frenck-IoT")
     return {
         "product_name": "Elgato Key Light",
         "serial_number": "CN11A1A00001",
