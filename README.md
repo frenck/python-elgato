@@ -146,6 +146,19 @@ async with Elgato("elgato-key-light-mini.local") as elgato:
     )
 ```
 
+### Wi-Fi signal
+
+Devices report their signal in dBm, which is awkward to put in front of a
+user. `signal_strength` maps it onto a percentage, from nothing at -100 dBm
+to as good as it gets at -50 dBm.
+
+```python
+async with Elgato("elgato-key-light.local") as elgato:
+    info = await elgato.info()
+    if info.wifi:
+        print(f"{info.wifi.rssi} dBm ({info.wifi.signal_strength}%)")
+```
+
 ### Device management
 
 ```python

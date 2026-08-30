@@ -1,5 +1,7 @@
 """Tests for retrieving information from the Elgato Key Light device."""
 
+import json
+
 import pytest
 from aiohttp import ClientSession
 from aioresponses import aioresponses
@@ -138,3 +140,42 @@ async def test_hardware_revision(
         info = await elgato.info()
 
     assert info.hardware_revision == expected
+
+
+@pytest.mark.parametrize(
+    ("rssi", "expected"),
+    [
+        (-100, 0),
+        (-90, 20),
+        (-60, 80),
+        (-50, 100),
+        (-120, 0),
+        (-10, 100),
+    ],
+)
+async def test_wifi_signal_strength(
+    responses: aioresponses,
+    rssi: int,
+    expected: int,
+) -> None:
+    """Test the Wi-Fi signal strength as a percentage.
+
+    A device reports dBm, which nothing outside a spectrum analyzer reads
+    comfortably. The scale runs from -100 dBm, which is nothing, to -50 dBm,
+    which is as good as it gets.
+    """
+    info = json.loads(load_fixture("info-key-light.json"))
+    info["wifi-info"]["rssi"] = rssi
+    responses.get(
+        "http://example.com:9123/elgato/accessory-info",
+        status=200,
+        body=json.dumps(info),
+        content_type="application/json",
+    )
+    async with ClientSession() as session:
+        elgato = Elgato("example.com", session=session)
+        device_info = await elgato.info()
+
+    assert device_info.wifi
+    assert device_info.wifi.rssi == rssi
+    assert device_info.wifi.signal_strength == expected

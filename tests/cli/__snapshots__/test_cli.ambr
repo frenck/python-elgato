@@ -120,7 +120,7 @@
   │ Hardware board  │ 53                │
   │ MAC address     │ AA:BB:CC:DD:EE:FF │
   │ Wi-Fi SSID      │ Frenck-IoT        │
-  │ Wi-Fi RSSI      │ -48 dBm           │
+  │ Wi-Fi signal    │ -48 dBm (100%)    │
   │ Wi-Fi frequency │ 2400 MHz          │
   └─────────────────┴───────────────────┘
   

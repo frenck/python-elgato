@@ -134,7 +134,10 @@ async def info(
         table.add_row("MAC address", device_info.mac_address)
     if device_info.wifi:
         table.add_row("Wi-Fi SSID", device_info.wifi.ssid)
-        table.add_row("Wi-Fi RSSI", f"{device_info.wifi.rssi} dBm")
+        table.add_row(
+            "Wi-Fi signal",
+            f"{device_info.wifi.rssi} dBm ({device_info.wifi.signal_strength}%)",
+        )
         table.add_row("Wi-Fi frequency", f"{device_info.wifi.frequency} MHz")
     console.print(table)
 
