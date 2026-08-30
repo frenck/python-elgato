@@ -213,6 +213,7 @@ class Info(BaseModel):
         firmware_build_number: An integer with the build number of the firmware.
         firmware_version: String containing the firmware version.
         hardware_board_type: An integer indicating the board revision.
+        hardware_revision: The revision of the board, if the device reports one.
         product_name: The product name.
         serial_number: Serial number of the Elgato Light.
 
@@ -228,6 +229,12 @@ class Info(BaseModel):
     serial_number: str = field(metadata=field_options(alias="serialNumber"))
     display_name: str = field(
         default="Elgato Light", metadata=field_options(alias="displayName")
+    )
+    # Devices are not consistent about this one. A Key Light sends the string
+    # "1", a Ring Light sends the number 0.2. It identifies a revision, it is
+    # not something to do arithmetic with, so it is kept as text.
+    hardware_revision: str | None = field(
+        default=None, metadata=field_options(alias="hardwareRevision")
     )
     mac_address: str | None = field(
         default=None, metadata=field_options(alias="macAddress")

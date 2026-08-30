@@ -1,12 +1,35 @@
 """Tests for retrieving information from the Elgato Light device."""
 
+from typing import Any
+
 import pytest
 from aiohttp import ClientSession
-from aioresponses import aioresponses
+from aioresponses import CallbackResult, aioresponses
 
-from elgato import Elgato, ElgatoNoBatteryError, PowerOnBehavior, Settings
+from elgato import (
+    Elgato,
+    ElgatoError,
+    ElgatoNoBatteryError,
+    PowerOnBehavior,
+    Settings,
+)
 
 from .conftest import load_fixture
+
+
+def capture_settings(responses: aioresponses) -> list[dict[str, Any]]:
+    """Answer settings writes and collect what was sent to the device."""
+    payloads: list[dict[str, Any]] = []
+
+    def handler(_url: str, **kwargs: Any) -> CallbackResult:
+        payloads.append(kwargs["json"])
+        return CallbackResult(status=200, body="{}")
+
+    responses.put(
+        "http://example.com:9123/elgato/lights/settings",
+        callback=handler,
+    )
+    return payloads
 
 
 async def test_settings_keylight(responses: aioresponses) -> None:
@@ -231,3 +254,90 @@ async def test_power_on_behavior_no_changes(responses: aioresponses) -> None:
     async with ClientSession() as session:
         elgato = Elgato("example.com", session=session)
         await elgato.power_on_behavior()
+
+
+async def test_transition_durations(responses: aioresponses) -> None:
+    """Test changing the transition durations of an Elgato Light."""
+    responses.get(
+        "http://example.com:9123/elgato/lights/settings",
+        status=200,
+        body=load_fixture("settings-keylight.json"),
+        content_type="application/json",
+    )
+    payloads = capture_settings(responses)
+
+    async with ClientSession() as session:
+        elgato = Elgato("example.com", session=session)
+        await elgato.transition_durations(
+            color_change=250,
+            switch_off=500,
+            switch_on=750,
+        )
+
+    assert payloads[0] == {
+        "powerOnBehavior": 1,
+        "powerOnBrightness": 20,
+        "powerOnTemperature": 213,
+        "switchOnDurationMs": 750,
+        "switchOffDurationMs": 500,
+        "colorChangeDurationMs": 250,
+    }
+
+
+async def test_transition_durations_partial(responses: aioresponses) -> None:
+    """Test the durations left out keep the value the device already had."""
+    responses.get(
+        "http://example.com:9123/elgato/lights/settings",
+        status=200,
+        body=load_fixture("settings-keylight.json"),
+        content_type="application/json",
+    )
+    payloads = capture_settings(responses)
+
+    async with ClientSession() as session:
+        elgato = Elgato("example.com", session=session)
+        await elgato.transition_durations(color_change=0)
+
+    assert payloads[0]["colorChangeDurationMs"] == 0
+    assert payloads[0]["switchOnDurationMs"] == 100
+    assert payloads[0]["switchOffDurationMs"] == 300
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "expected"),
+    [
+        ({"color_change": -1}, "color_change"),
+        ({"switch_off": -1}, "switch_off"),
+        ({"switch_on": -250}, "switch_on"),
+    ],
+)
+async def test_transition_durations_negative(
+    kwargs: dict[str, int],
+    expected: str,
+) -> None:
+    """Test a negative duration is refused before the device sees it.
+
+    The device takes a negative number without complaint and stores a 0,
+    so nothing downstream would report this.
+    """
+    async with ClientSession() as session:
+        elgato = Elgato("example.com", session=session)
+        with pytest.raises(ElgatoError, match=f"{expected} cannot be negative"):
+            await elgato.transition_durations(**kwargs)
+
+
+async def test_transition_durations_drops_battery(responses: aioresponses) -> None:
+    """Test battery settings are not sent back with the other settings."""
+    responses.get(
+        "http://example.com:9123/elgato/lights/settings",
+        status=200,
+        body=load_fixture("settings-key-light-mini.json"),
+        content_type="application/json",
+    )
+    payloads = capture_settings(responses)
+
+    async with ClientSession() as session:
+        elgato = Elgato("example.com", session=session)
+        await elgato.transition_durations(switch_on=200)
+
+    assert "battery" not in payloads[0]

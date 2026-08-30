@@ -1,5 +1,6 @@
 """Tests for retrieving information from the Elgato Key Light device."""
 
+import pytest
 from aiohttp import ClientSession
 from aioresponses import aioresponses
 
@@ -106,3 +107,34 @@ async def test_missing_display_name(responses: aioresponses) -> None:
         info: Info = await elgato.info()
         assert info
         assert info.display_name == "Elgato Light"
+
+
+@pytest.mark.parametrize(
+    ("fixture", "expected"),
+    [
+        ("info-key-light.json", "1"),
+        ("info-key-light-mini.json", "0.1"),
+        ("info-light-strip.json", None),
+    ],
+)
+async def test_hardware_revision(
+    responses: aioresponses,
+    fixture: str,
+    expected: str | None,
+) -> None:
+    """Test the hardware revision, which devices report in varying shapes.
+
+    A Key Light sends the string "1", a Key Light Mini the number 0.1, and
+    an older Light Strip does not send it at all.
+    """
+    responses.get(
+        "http://example.com:9123/elgato/accessory-info",
+        status=200,
+        body=load_fixture(fixture),
+        content_type="application/json",
+    )
+    async with ClientSession() as session:
+        elgato = Elgato("example.com", session=session)
+        info = await elgato.info()
+
+    assert info.hardware_revision == expected
