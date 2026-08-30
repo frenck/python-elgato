@@ -490,24 +490,78 @@ class Elgato:
             temperature: The power on color temperature of the light, in mired.
 
         """
-        current_settings = await self.settings()
+        settings = await self.settings()
         if behavior is not None:
-            current_settings.power_on_behavior = behavior
+            settings.power_on_behavior = behavior
         if brightness is not None:
-            current_settings.power_on_brightness = brightness
+            settings.power_on_brightness = brightness
         if hue is not None:
-            current_settings.power_on_hue = hue
+            settings.power_on_hue = hue
         if temperature is not None:
-            current_settings.power_on_temperature = temperature
+            settings.power_on_temperature = temperature
 
-        # Unset battery if present, needs special handling
-        if current_settings.battery:
-            current_settings.battery = None
+        await self._write_settings(settings)
+
+    async def transition_durations(
+        self,
+        *,
+        color_change: int | None = None,
+        switch_off: int | None = None,
+        switch_on: int | None = None,
+    ) -> None:
+        """Change how long the Elgato Light device takes to change state.
+
+        The device does not check these values. It answers 200 to a negative
+        number and to a string alike, and quietly stores a 0, so anything
+        unreasonable is turned away here instead.
+
+        Args:
+        ----
+            color_change: Fade time of brightness and color changes, in ms.
+            switch_off: Fade out time when the light is turned off, in ms.
+            switch_on: Fade in time when the light is turned on, in ms.
+
+        Raises:
+        ------
+            ElgatoError: One of the provided durations is negative.
+
+        """
+        durations = {
+            "color_change": color_change,
+            "switch_off": switch_off,
+            "switch_on": switch_on,
+        }
+        for name, duration in durations.items():
+            if duration is not None and duration < 0:
+                msg = f"Transition duration {name} cannot be negative"
+                raise ElgatoError(msg)
+
+        settings = await self.settings()
+        if color_change is not None:
+            settings.color_change_duration = color_change
+        if switch_off is not None:
+            settings.switch_off_duration = switch_off
+        if switch_on is not None:
+            settings.switch_on_duration = switch_on
+
+        await self._write_settings(settings)
+
+    async def _write_settings(self, settings: Settings) -> None:
+        """Write settings back to the Elgato Light device.
+
+        Args:
+        ----
+            settings: The settings to store on the device.
+
+        """
+        # Battery settings have their own shape on the way in, and sending
+        # them back here makes the device refuse the lot.
+        settings.battery = None
 
         await self._request(
             "lights/settings",
             method=METH_PUT,
-            data=current_settings.to_dict(),
+            data=settings.to_dict(),
         )
 
     async def update_firmware(

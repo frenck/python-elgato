@@ -228,6 +228,23 @@ async with Elgato("elgato-key-light.local") as elgato:
     )
 ```
 
+### Transition durations
+
+How long the light takes to fade when it is switched or changed, in
+milliseconds. Values left out keep whatever the device already had.
+
+```python
+async with Elgato("elgato-key-light.local") as elgato:
+    await elgato.transition_durations(
+        switch_on=100,
+        switch_off=300,
+        color_change=100,
+    )
+```
+
+The device does not check these. It answers `200` to a negative number and
+stores a `0`, so anything negative is refused here instead.
+
 ### Connection options
 
 All constructor arguments are keyword-only (except `host`):
