@@ -126,6 +126,10 @@ class FirmwareCatalog:
     request_timeout: int = 30
 
     _close_session: bool = False
+    # Reading the archive takes several requests against offsets that only
+    # hold for the archive they came from. A refresh that lands halfway
+    # through would leave the rest of them pointing into a different file.
+    _lock: asyncio.Lock = field(default_factory=asyncio.Lock)
     _archive_url: str = ""
     _archive_size: int = 0
     _members: dict[int, _ArchiveMember] = field(default_factory=dict)
@@ -149,8 +153,22 @@ class FirmwareCatalog:
             A dictionary of board type to the newest FirmwareVersion for it.
 
         """
-        if self._versions and not refresh:
+        async with self._lock:
+            await self._load(refresh=refresh)
             return dict(self._versions)
+
+    async def _load(self, *, refresh: bool = False) -> None:
+        """Read the archive index, once, or again when asked.
+
+        Callers hold the lock; everything this touches is shared.
+
+        Args:
+        ----
+            refresh: Check whether Elgato published a new Control Center.
+
+        """
+        if self._versions and not refresh:
+            return
 
         published = await self._published_archive()
 
@@ -159,8 +177,6 @@ class FirmwareCatalog:
             self._members = {}
             self._versions = {}
             await self._read_index()
-
-        return dict(self._versions)
 
     async def latest(self, board_type: int) -> FirmwareVersion:
         """Get the newest firmware Elgato ships for a board type.
@@ -202,12 +218,16 @@ class FirmwareCatalog:
                 the downloaded image does not verify.
 
         """
-        await self.latest(board_type)
-        member = self._members[board_type]
+        async with self._lock:
+            await self._load()
 
-        window = await self._read_local_header(member)
-        data_offset = member.header_offset + _local_data_offset(window)
-        compressed = await self._read(data_offset, member.compressed_size)
+            if (member := self._members.get(board_type)) is None:
+                msg = f"Elgato ships no firmware for board type {board_type}"
+                raise ElgatoFirmwareError(msg)
+
+            window = await self._read_local_header(member)
+            data_offset = member.header_offset + _local_data_offset(window)
+            compressed = await self._read(data_offset, member.compressed_size)
 
         return FirmwareImage.from_bytes(_decompress(compressed, member.compression))
 
